@@ -1,0 +1,7 @@
+{
+	"name": "@bluecewe/rethink-topology",
+	"description": "Configures RethinkDB tables and indexes according to external topology file.",
+	"version": "0.1.0",
+	"main": "index.js",
+	"private": true
+}
