@@ -13,18 +13,20 @@ export default async function(table: Topology.Table, tableList: TableList, topol
 	if (!tableExists)
 	{
 		log('Creating...', table);
-		const created = await create(table, connection);
+		const created = await create(table, topology, connection);
 		if (!created)
 		{
 			return;
 		};
+		log('Created.', table);
 	};
+	return true;
 };
 
-async function create(table: Topology.Table, connection)
+async function create(table: Topology.Table, topology: Topology.Base, connection)
 {
 	const query = RethinkDB
-		.tableCreate(table.name);
+		.tableCreate(table.name, {shards: topology.shards, replicas: topology.replicas});
 	try
 	{
 		await query.run(connection);
