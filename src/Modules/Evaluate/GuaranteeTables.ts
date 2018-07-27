@@ -4,6 +4,7 @@
 import RethinkDB from 'rethinkdb';
 
 // Internal Modules
+import { logError as logDatabaseError } from './ValidateDatabase';
 import guaranteeTable from './GuaranteeTable';
 
 // Types
@@ -12,9 +13,13 @@ export interface TableList extends Array<string> {};
 export interface TablePromises extends Array<TablePromise> {};
 export interface TablePromise extends Promise<boolean> {};
 
-export default async function(topology: Topology.Base, connection)
+export default async function(topology: Topology.Base, connection: RethinkDB.Connection)
 {
 	const list = await getTableList(connection);
+	if (!list)
+	{
+		return;
+	};
 	const promises: TablePromises = [];
 	for (let table of topology.tables)
 	{
@@ -24,7 +29,7 @@ export default async function(topology: Topology.Base, connection)
 	await Promise.all(promises);
 };
 
-async function getTableList(connection)
+async function getTableList(connection: RethinkDB.Connection)
 {
 	const query = RethinkDB.tableList();
 	let list: TableList;
@@ -34,6 +39,7 @@ async function getTableList(connection)
 	}
 	catch (error)
 	{
+		logDatabaseError('Failed table list retrieval: ' + error.message);
 		return;
 	};
 	return list;
