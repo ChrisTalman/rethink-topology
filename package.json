@@ -3,5 +3,17 @@
 	"description": "Configures RethinkDB tables and indexes according to external topology file.",
 	"version": "0.1.0",
 	"main": "index.js",
-	"private": true
+	"private": true,
+	"devDependencies": {
+		"@types/node": "^10.5.3",
+		"ts-loader": "^4.4.2",
+		"typescript": "^2.9.2",
+		"webpack": "^4.16.2",
+		"webpack-cli": "^3.1.0",
+		"webpack-node-externals": "^1.7.2"
+	},
+	"dependencies": {
+		"@bluecewe/config": "git+https://Bluecewe@bitbucket.org/Bluecewe/config.git",
+		"rethinkdb": "^2.3.3"
+	}
 }
