@@ -4,24 +4,24 @@
 import * as FileSystem from 'fs';
 
 // Types
-import { Topology } from 'src/Modules/Types';
+import { Topology } from 'src/Types';
 
 export default function()
 {
     let file: string;
 	try
 	{
-		file = FileSystem.readFileSync('topology.json', 'utf8');
+		file = FileSystem.readFileSync('topology.js', 'utf8');
 	}
 	catch (error)
 	{
 		console.error('Topology not found:', error.message);
 		return;
 	};
-	let topology: Topology;
+	let topology: Topology.Base;
 	try
 	{
-		topology = JSON.parse(file);
+		topology = eval(file);
 	}
 	catch (error)
 	{

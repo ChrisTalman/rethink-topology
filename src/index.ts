@@ -3,6 +3,7 @@
 // Internal Modules
 import config from 'src/Modules/Config';
 import retrieve from 'src/Modules/Retrieve';
+import evaluate from 'src/Modules/Evaluate';
 
 initialise();
 function initialise()
@@ -16,4 +17,5 @@ function initialise()
 	{
 		return;
 	};
+	evaluate(topology);
 };

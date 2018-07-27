@@ -4,7 +4,7 @@
 import Config from '@bluecewe/config';
 
 // Types
-import { ConfigData } from 'src/Modules/Types';
+import { ConfigData } from 'src/Types';
 
 const config = new Config <ConfigData.Base> ();
 
