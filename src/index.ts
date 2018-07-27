@@ -7,7 +7,10 @@ import retrieve from 'src/Modules/Retrieve';
 initialise();
 function initialise()
 {
-	console.log(config.data);
+	if (!config.initialised)
+	{
+		return;
+	};
 	const topology = retrieve();
 	if (!topology)
 	{
