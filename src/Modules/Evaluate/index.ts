@@ -1,5 +1,8 @@
 'use strict';
 
+// External Modules
+import RethinkDB from 'rethinkdb';
+
 // Internal Modules
 import generateConnection from './GenerateConnection';
 import validateDatabase from './ValidateDatabase';
@@ -23,7 +26,7 @@ export default async function(topology: Topology.Base)
 	console.log('Disconnect.');
 };
 
-export async function run(topology: Topology.Base, connection)
+export async function run(topology: Topology.Base, connection: RethinkDB.Connection)
 {
 	const databaseValid = await validateDatabase(connection);
 	if (!databaseValid)

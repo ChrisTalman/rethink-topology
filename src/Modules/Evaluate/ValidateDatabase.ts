@@ -9,7 +9,7 @@ import config from 'src/Modules/Config';
 // Types
 interface List extends Array<string> {};
 
-export default async function(connection)
+export default async function(connection: RethinkDB.Connection)
 {
     let list: List;
     try
@@ -24,11 +24,21 @@ export default async function(connection)
     const valid = list.includes(config.data.rethink.db);
 	if (valid)
 	{
-		console.log('[Database] [' + config.data.rethink.db + '] Exists.');
+        log('Exists.');
 	}
 	else
 	{
-        console.log('[Database] [' + config.data.rethink.db + '] Doesn\'t exist.');
+        logError('Doesn\'t exist.');
 	};
     return valid;
+};
+
+function log(message: string)
+{
+	console.log('[Database] [' + config.data.rethink.db + '] ' + message);
+};
+
+export function logError(message: string)
+{
+	console.error('[Database] [' + config.data.rethink.db + '] ' + message);
 };
