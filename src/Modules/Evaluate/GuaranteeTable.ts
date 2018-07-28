@@ -39,7 +39,7 @@ async function guarantee(table: Topology.Table, tableList: TableList, topology: 
 		}
 		catch (error)
 		{
-			logError('Failed creation: ' + error.message, table);
+			logError('Creation failed: ' + error.message, table);
 			return;
 		};
 		log('Created.', table);
@@ -49,10 +49,16 @@ async function guarantee(table: Topology.Table, tableList: TableList, topology: 
 
 function log(message: string, table: Topology.Table)
 {
-	console.log('[Table] [' + table.name + '] ' + message);
+	console.log(generateMessage(message, table));
 };
 
 export function logError(message: string, table: Topology.Table)
 {
-	console.error('[Table] [' + table.name + '] ' + message);
+	console.error(generateMessage(message, table));
+};
+
+function generateMessage(message: string, table: Topology.Table)
+{
+	const generated = '[Table][' + table.name + '] ' + message;
+	return generated;
 };

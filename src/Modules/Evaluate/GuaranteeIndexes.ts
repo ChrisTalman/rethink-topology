@@ -21,9 +21,9 @@ export default async function(table: Topology.Table, connection: RethinkDB.Conne
 		return;
 	};
 	const promises: IndexPromises = [];
-	for (let index of indexList)
+	for (let index of table.indexes)
 	{
-		const promise = guaranteeIndex(index, table, connection);
+		const promise = guaranteeIndex(index, indexList, table, connection);
 		promises.push(promise);
 	};
 	await Promise.all(promises);
@@ -46,14 +46,4 @@ async function getIndexList(table: Topology.Table, connection: RethinkDB.Connect
 		return;
 	};
 	return list;
-};
-
-function log(message: string, table: Topology.Table)
-{
-	console.log('[Index] [' + table.name + '] ' + message);
-};
-
-function logError(message: string, table: Topology.Table)
-{
-	console.error('[Index] [' + table.name + '] ' + message);
 };

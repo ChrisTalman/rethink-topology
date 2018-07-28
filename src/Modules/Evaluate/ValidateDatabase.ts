@@ -35,10 +35,16 @@ export default async function(connection: RethinkDB.Connection)
 
 function log(message: string)
 {
-	console.log('[Database] [' + config.data.rethink.db + '] ' + message);
+	console.log(generateMessage(message));
 };
 
 export function logError(message: string)
 {
-	console.error('[Database] [' + config.data.rethink.db + '] ' + message);
+	console.error(generateMessage(message));
+};
+
+function generateMessage(message: string)
+{
+	const generated = '[Database][' + config.data.rethink.db + '] ' + message;
+	return generated;
 };
