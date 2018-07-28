@@ -30,7 +30,7 @@ export namespace Topology
 		name: string;
 		indexes: Indexes;
 	};
-	export interface Indexes extends Array<Index> {};
+	export interface Indexes extends Array<IndexVariant> {};
 	export type IndexVariant = string | Index;
 	export interface Index
 	{
