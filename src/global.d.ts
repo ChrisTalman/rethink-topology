@@ -27,4 +27,5 @@ declare module 'rethinkdb'
 		replicas?: number;
 	}
 	export function table(name: string);
+	export function row(field: string);
 }
