@@ -28,7 +28,11 @@ export default async function(table: Topology.Table, tableList: TableList, topol
 async function guarantee(table: Topology.Table, tableList: TableList, topology: Topology.Base, connection: RethinkDB.Connection)
 {
 	const exists = tableList.includes(table.name);
-	if (!exists)
+	if (exists)
+	{
+		log('Exists.', table);
+	}
+	else
 	{
 		log('Creating...', table);
 		const query = RethinkDB
