@@ -8,6 +8,7 @@ import * as FileSystem from 'fs';
 import { Topology } from 'src/Types';
 
 // Constants
+const FILE_NAME = 'topology.config.js';
 const SCHEMA = Joi.object
 	(
 		{
@@ -44,7 +45,7 @@ export default function()
     let file: string;
 	try
 	{
-		file = FileSystem.readFileSync('topology.js', 'utf8');
+		file = FileSystem.readFileSync(FILE_NAME, 'utf8');
 	}
 	catch (error)
 	{
