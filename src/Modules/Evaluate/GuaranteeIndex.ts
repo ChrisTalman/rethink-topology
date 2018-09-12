@@ -84,17 +84,17 @@ function mapCompoundIndex(field: Topology.CompoundIndexField)
 {
 	if (typeof field === 'string')
 	{
-		RethinkDB.row(field);
+		return RethinkDB.row(field);
 	}
 	else
 	{
 		if (field.convert)
 		{
-			RethinkDB.row(field.name).coerceTo('number');
+			return RethinkDB.row(field.name).coerceTo('number');
 		}
 		else
 		{
-			RethinkDB.row(field.name);
+			return RethinkDB.row(field.name);
 		};
 	};
 };
