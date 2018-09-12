@@ -40,6 +40,15 @@ function generateIndexName(index: Topology.IndexVariant)
 	{
 		return index;
 	}
+	else if ('name' in index)
+	{
+		let type: string;
+		if (index.convert === Number)
+		{
+			type = 'number';
+		};
+		return index.name + '=>' + type;
+	}
 	else
 	{
 		const name = index.compound.join('_');
@@ -53,10 +62,40 @@ function generateIndexFunction(index: Topology.IndexVariant)
 	{
 		return RethinkDB.row(index);
 	}
+	else if ('name' in index)
+	{
+		if (index.convert)
+		{
+			return (document) => document(index.name).coerceTo('number');
+		}
+		else
+		{
+			return RethinkDB.row(index.name);
+		};
+	}
 	else
 	{
-		const indexFunction = index.compound.map(element => RethinkDB.row(element));
+		const indexFunction = index.compound.map(mapCompoundIndex);
 		return indexFunction;
+	};
+};
+
+function mapCompoundIndex(field: Topology.CompoundIndexField)
+{
+	if (typeof field === 'string')
+	{
+		RethinkDB.row(field);
+	}
+	else
+	{
+		if (field.convert)
+		{
+			RethinkDB.row(field.name).coerceTo('number');
+		}
+		else
+		{
+			RethinkDB.row(field.name);
+		};
 	};
 };
 

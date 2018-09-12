@@ -9,6 +9,11 @@ import { Topology } from 'src/Types';
 
 // Constants
 const FILE_NAME = 'topology.config.js';
+const NAME_INDEX_SCHEMA =
+{
+	name: Joi.string().required(),
+	convert: Joi.valid(Number).optional()
+};
 const SCHEMA = Joi.object
 	(
 		{
@@ -19,7 +24,11 @@ const SCHEMA = Joi.object
 				.items
 				(
 					{
-						name: Joi.string().required(),
+						name: Joi.alternatives
+						(
+							Joi.string().required(),
+							NAME_INDEX_SCHEMA
+						),
 						indexes: Joi
 							.array()
 							.items
@@ -28,7 +37,15 @@ const SCHEMA = Joi.object
 								{
 									name: Joi.string().optional(),
 									//generator: Joi.alternatives(Joi.array(), Joi.func()).optional(), // Not currently supported.
-									compound: Joi.array().items(Joi.string()).min(1).optional()
+									compound: Joi
+										.array()
+										.items
+										(
+											Joi.string(),
+											NAME_INDEX_SCHEMA
+										)
+										.min(1)
+										.optional()
 								}
 							)
 							.default([])

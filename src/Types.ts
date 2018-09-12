@@ -31,9 +31,18 @@ export namespace Topology
 		indexes: Indexes;
 	};
 	export interface Indexes extends Array<IndexVariant> {};
-	export type IndexVariant = string | Index;
-	export interface Index
+	export type IndexVariant = string
+		| NameIndex
+		| CompoundIndex
+	;
+	export interface NameIndex
 	{
-		compound: Array<string>;
+		name: string;
+		convert?: NumberConstructor;
 	};
+	export interface CompoundIndex
+	{
+		compound: Array<CompoundIndexField>;
+	};
+	export type CompoundIndexField = string | NameIndex;
 };
