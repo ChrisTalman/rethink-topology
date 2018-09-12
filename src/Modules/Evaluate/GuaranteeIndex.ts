@@ -42,17 +42,41 @@ function generateIndexName(index: Topology.IndexVariant)
 	}
 	else if ('name' in index)
 	{
-		let type: string;
-		if (index.convert === Number)
-		{
-			type = 'number';
-		};
-		return index.name + '=>' + type;
+		return generateNameIndexName(index);
 	}
 	else
 	{
-		const name = index.compound.join('_');
+		const name = index.compound.map(mapCompoundIndexName).join('_');
 		return name;
+	};
+};
+
+function generateNameIndexName(index: Topology.NameIndex)
+{
+	let type: string;
+	if (index.convert === Number)
+	{
+		type = 'number';
+	};
+	return index.name + '=>' + type;
+};
+
+function mapCompoundIndexName(field: Topology.CompoundIndexField)
+{
+	if (typeof field === 'string')
+	{
+		return field;
+	}
+	else
+	{
+		if (field.convert === Number)
+		{
+			return generateNameIndexName(field);
+		}
+		else
+		{
+			return field.name;
+		};
 	};
 };
 
@@ -75,12 +99,12 @@ function generateIndexFunction(index: Topology.IndexVariant)
 	}
 	else
 	{
-		const indexFunction = index.compound.map(mapCompoundIndex);
+		const indexFunction = index.compound.map(mapCompoundIndexFunction);
 		return indexFunction;
 	};
 };
 
-function mapCompoundIndex(field: Topology.CompoundIndexField)
+function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
 {
 	if (typeof field === 'string')
 	{
