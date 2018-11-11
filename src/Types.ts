@@ -31,15 +31,27 @@ export namespace Topology
 		indexes: Indexes;
 	};
 	export interface Indexes extends Array<IndexVariant> {};
-	export type IndexVariant = string
-		| NameIndex
+	export type IndexVariant =
+		string
+		| NameIndexVariant
 		| CompoundIndex
+	;
+	export type NameIndexVariant =
+		NameIndex
+		| NameConvertIndex
+		| NameArbitraryIndex
 	;
 	export interface NameIndex
 	{
 		name: string;
-		convert?: NumberConstructor;
-		arbitrary?: Function;
+	}
+	export interface NameConvertIndex extends NameIndex
+	{
+		convert: NumberConstructor;
+	};
+	export interface NameArbitraryIndex extends NameIndex
+	{
+		arbitrary: Function;
 	};
 	export interface CompoundIndex
 	{
