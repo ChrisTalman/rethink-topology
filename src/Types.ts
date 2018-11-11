@@ -39,6 +39,7 @@ export namespace Topology
 	{
 		name: string;
 		convert?: NumberConstructor;
+		arbitrary?: Function;
 	};
 	export interface CompoundIndex
 	{

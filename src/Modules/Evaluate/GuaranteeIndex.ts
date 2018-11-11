@@ -1,36 +1,64 @@
 'use strict';
 
 // External Modules
+import * as Crypto from 'crypto';
 import RethinkDB from 'rethinkdb';
+
+// Internal Modules
+import standardiseVariables from './StandardiseVariables';
 
 // Types
 import { Topology } from 'src/Types';
 import { IndexList } from './GuaranteeIndexes';
+interface Index
+{
+    index: string;
+    ready: boolean;
+    progress: number;
+    function: Buffer;
+    multi: boolean;
+    geo: boolean;
+    outdated: boolean;
+	query: string;
+};
 
 export default async function(index: Topology.IndexVariant, indexList: IndexList, table: Topology.Table, connection: RethinkDB.Connection)
 {
 	const indexName = generateIndexName(index);
-	const indexFunction = generateIndexFunction(index);
+	const { indexFunction, indexHash } = generateIndexFunction(index);
 	const exists = indexList.includes(indexName);
+	let updated = false;
 	if (exists)
 	{
-		log('Exists.', indexName, table);
-		return true;
+		if (indexHash)
+		{
+			const different = await isIndexDifferent({name: indexName, hash: indexHash, table});
+			if (different)
+			{
+				await RethinkDB.table(table.name).indexDrop(indexName);
+				updated = true;
+			};
+		}
+		else
+		{
+			log('Exists.', indexName, table);
+			return true;
+		};
 	};
 	const query = RethinkDB
 		.table(table.name)
 		.indexCreate(indexName, indexFunction);
-	log('Creating...', indexName, table);
+	log(updated ? 'Updating... ' : 'Creating...', indexName, table);
 	try
 	{
 		await query.run(connection);
 	}
 	catch (error)
 	{
-		logError('Creation failed: ' + error.message, indexName, table);
+		logError((updated ? 'Update' : 'Creation') + ' failed: ' + error.message, indexName, table);
 		return;
 	};
-	log('Created.', indexName, table);
+	log((updated ? 'Updated' : 'Created') + '.', indexName, table);
 	return true;
 };
 
@@ -82,45 +110,77 @@ function mapCompoundIndexName(field: Topology.CompoundIndexField)
 
 function generateIndexFunction(index: Topology.IndexVariant)
 {
+	let indexFunction: Function | Array<Function>;
+	let indexHash: string;
 	if (typeof index === 'string')
 	{
-		return RethinkDB.row(index);
+		indexFunction = RethinkDB.row(index) as Function;
 	}
 	else if ('name' in index)
 	{
 		if (index.convert)
 		{
-			return (document) => document(index.name).coerceTo('number');
+			indexFunction = document => document(index.name).coerceTo('number') as Function;
+		}
+		else if (index.arbitrary)
+		{
+			indexFunction = document => index.arbitrary(document) as Function;
 		}
 		else
 		{
-			return RethinkDB.row(index.name);
+			indexFunction = RethinkDB.row(index.name) as Function;
 		};
 	}
 	else
 	{
-		const indexFunction = index.compound.map(mapCompoundIndexFunction);
-		return indexFunction;
+		indexFunction = index.compound.map(mapCompoundIndexFunction);
+		indexHash = generateCompoundIndexFunctionHash(indexFunction);
 	};
+	return {indexFunction, indexHash};
 };
 
 function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
 {
 	if (typeof field === 'string')
 	{
-		return RethinkDB.row(field);
+		return RethinkDB.row(field) as Function;
 	}
 	else
 	{
 		if (field.convert)
 		{
-			return RethinkDB.row(field.name).coerceTo('number');
+			return RethinkDB.row(field.name).coerceTo('number') as Function;
+		}
+		else if (field.arbitrary)
+		{
+			return document => field.arbitrary(document);
 		}
 		else
 		{
-			return RethinkDB.row(field.name);
+			return RethinkDB.row(field.name) as Function;
 		};
 	};
+};
+
+function generateCompoundIndexFunctionHash(compound: Array<Function>)
+{
+	const source = standardiseVariables(compound.map(item => item.toString()).join(''));
+    const hash = generateQueryHash(source);
+	return hash;
+};
+
+function generateQueryHash(source: string)
+{
+	const hash = Crypto.createHash('sha1').update(source).digest('base64');
+	return hash;
+};
+
+async function isIndexDifferent({name, hash, table}: {name: string, hash: string, table: Topology.Table})
+{
+	const index: Index = await RethinkDB.table(table.name).indexStatus(name).run();
+	const existingHash = generateQueryHash(standardiseVariables(index.query));
+	const different = hash !== existingHash;
+	return different;
 };
 
 function log(message: string, indexName: string, table: Topology.Table)
