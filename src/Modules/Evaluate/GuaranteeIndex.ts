@@ -79,10 +79,10 @@ function generateIndexName(index: Topology.IndexVariant)
 	};
 };
 
-function generateNameIndexName(index: Topology.NameIndex)
+function generateNameIndexName(index: Topology.NameIndexVariant)
 {
 	let type: string;
-	if (index.convert === Number)
+	if ('convert' in index && index.convert === Number)
 	{
 		type = 'number';
 	};
@@ -97,7 +97,7 @@ function mapCompoundIndexName(field: Topology.CompoundIndexField)
 	}
 	else
 	{
-		if (field.convert === Number)
+		if ('convert' in field && field.convert === Number)
 		{
 			return generateNameIndexName(field);
 		}
@@ -118,11 +118,11 @@ function generateIndexFunction(index: Topology.IndexVariant)
 	}
 	else if ('name' in index)
 	{
-		if (index.convert)
+		if ('convert' in index)
 		{
 			indexFunction = document => document(index.name).coerceTo('number') as Function;
 		}
-		else if (index.arbitrary)
+		else if ('arbitrary' in index)
 		{
 			indexFunction = document => index.arbitrary(document) as Function;
 		}
@@ -147,11 +147,11 @@ function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
 	}
 	else
 	{
-		if (field.convert)
+		if ('convert' in field)
 		{
 			return RethinkDB.row(field.name).coerceTo('number') as Function;
 		}
-		else if (field.arbitrary)
+		else if ('arbitrary' in field)
 		{
 			return document => field.arbitrary(document);
 		}
