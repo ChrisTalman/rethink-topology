@@ -17,5 +17,9 @@
 		"@bluecewe/config": "git+https://bitbucket.org/Bluecewe/config.git",
 		"joi": "^13.4.0",
 		"rethinkdb": "^2.3.3"
+	},
+	"scripts":
+	{
+		"build": "./node_modules/.bin/webpack"
 	}
 }
