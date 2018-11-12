@@ -9,11 +9,15 @@ import { Topology } from 'src/Types';
 
 // Constants
 const FILE_NAME = 'topology.config.js';
-const NAME_INDEX_SCHEMA =
-{
-	name: Joi.string().required(),
-	convert: Joi.valid(Number).optional()
-};
+const NAME_INDEX_SCHEMA = Joi.object
+	(
+		{
+			name: Joi.string().required(),
+			convert: Joi.valid(Number).optional(),
+			arbitrary: Joi.func().optional()
+		}
+	)
+	.without('convert', ['arbitrary']);
 const SCHEMA = Joi.object
 	(
 		{
