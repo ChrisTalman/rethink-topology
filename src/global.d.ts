@@ -28,4 +28,5 @@ declare module 'rethinkdb'
 	}
 	export function table(name: string);
 	export function row(field: string);
+	export function expr(value: any);
 }
