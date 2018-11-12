@@ -171,7 +171,8 @@ function generateCompoundIndexFunctionHash(compound: Function, indexName: string
 	const id = ulid();
 	const placeholdered = compound(RethinkDB.expr({placeholder: id})).toString();
 	const variabled = replaceDocumentPlaceholder(placeholdered);
-	const standardised = standardiseVariables(variabled);
+	const spaced = replaceSpacelessCommas(variabled);
+	const standardised = standardiseVariables(spaced);
 	const encapsulated = encapsulateCompoundIndexQuery(standardised, indexName);
     const hash = generateQueryHash(encapsulated);
 	return hash;
@@ -181,6 +182,13 @@ function replaceDocumentPlaceholder(source: string)
 {
 	const EXPRESSION = /(?:r\(\{"placeholder": "[\w]+"\}\)|{"placeholder": "[\w]+"\})/g;
 	const replaced = source.replace(EXPRESSION, 'var_0');
+	return replaced;
+};
+
+function replaceSpacelessCommas(source: string)
+{
+	const EXPRESSION = /,(?! )/g;
+	const replaced = source.replace(EXPRESSION, match => match + ' ');
 	return replaced;
 };
 
