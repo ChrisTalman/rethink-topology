@@ -32,7 +32,7 @@ export default async function(index: Topology.IndexVariant, indexList: IndexList
 	{
 		if (indexHash)
 		{
-			const different = await isIndexDifferent({name: indexName, hash: indexHash, table});
+			const different = await isIndexDifferent({name: indexName, hash: indexHash, table, connection});
 			if (different)
 			{
 				await RethinkDB.table(table.name).indexDrop(indexName);
@@ -175,9 +175,9 @@ function generateQueryHash(source: string)
 	return hash;
 };
 
-async function isIndexDifferent({name, hash, table}: {name: string, hash: string, table: Topology.Table})
+async function isIndexDifferent({name, hash, table, connection}: {name: string, hash: string, table: Topology.Table, connection: RethinkDB.Connection})
 {
-	const index: Index = await RethinkDB.table(table.name).indexStatus(name).run();
+	const index: Index = await RethinkDB.table(table.name).indexStatus(name).run(connection);
 	const existingHash = generateQueryHash(standardiseVariables(index.query));
 	const different = hash !== existingHash;
 	return different;
