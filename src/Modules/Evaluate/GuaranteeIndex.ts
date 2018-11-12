@@ -4,6 +4,7 @@
 
 // External Modules
 import * as Crypto from 'crypto';
+import { ulid } from 'ulid';
 import RethinkDB from 'rethinkdb';
 
 // Internal Modules
@@ -113,7 +114,7 @@ function mapCompoundIndexName(field: Topology.CompoundIndexField)
 
 function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant, indexName: string})
 {
-	let indexFunction: Function | Array<Function>;
+	let indexFunction: Function;
 	let indexHash: string;
 	if (typeof index === 'string')
 	{
@@ -136,41 +137,51 @@ function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant
 	}
 	else
 	{
-		indexFunction = index.compound.map(mapCompoundIndexFunction);
+		indexFunction = document => index.compound.map(field => mapCompoundIndexFunction({field, document}));
 		indexHash = generateCompoundIndexFunctionHash(indexFunction, indexName);
 	};
 	return {indexFunction, indexHash};
 };
 
-function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
+function mapCompoundIndexFunction({field, document}: {field: Topology.CompoundIndexField, document: any})
 {
 	if (typeof field === 'string')
 	{
-		return RethinkDB.row(field) as Function;
+		return document(field) as Function;
 	}
 	else
 	{
 		if ('convert' in field)
 		{
-			return RethinkDB.row(field.name).coerceTo('number') as Function;
+			return document(field.name).coerceTo('number') as Function;
 		}
 		else if ('arbitrary' in field)
 		{
-			return field.arbitrary(RethinkDB.row);
+			return field.arbitrary(document);
 		}
 		else
 		{
-			return RethinkDB.row(field.name) as Function;
+			return document(field.name) as Function;
 		};
 	};
 };
 
-function generateCompoundIndexFunctionHash(compound: Array<Function>, indexName: string)
+function generateCompoundIndexFunctionHash(compound: Function, indexName: string)
 {
-	const standardised = standardiseVariables(compound.map(item => item.toString()).join(', '));
+	const id = ulid();
+	const placeholdered = compound(RethinkDB.expr({placeholder: id})).toString();
+	const variabled = replaceDocumentPlaceholder(placeholdered);
+	const standardised = standardiseVariables(variabled);
 	const encapsulated = encapsulateCompoundIndexQuery(standardised, indexName);
     const hash = generateQueryHash(encapsulated);
 	return hash;
+};
+
+function replaceDocumentPlaceholder(source: string)
+{
+	const EXPRESSION = /(?:r\(\{"placeholder": "[\w]+"\}\)|{"placeholder": "[\w]+"\})/g;
+	const replaced = source.replace(EXPRESSION, 'var_0');
+	return replaced;
 };
 
 function encapsulateCompoundIndexQuery(source: string, indexName: string)
