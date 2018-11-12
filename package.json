@@ -16,10 +16,10 @@
 	"dependencies": {
 		"@bluecewe/config": "git+https://bitbucket.org/Bluecewe/config.git",
 		"joi": "^13.4.0",
-		"rethinkdb": "^2.3.3"
+		"rethinkdb": "^2.3.3",
+		"ulid": "^2.3.0"
 	},
-	"scripts":
-	{
+	"scripts": {
 		"build": "./node_modules/.bin/webpack"
 	}
 }
