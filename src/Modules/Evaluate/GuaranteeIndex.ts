@@ -1,10 +1,13 @@
 'use strict';
 
+// To Do: Ensure that standalone arbitrary function indexes function correctly and are also updated when they change.
+
 // External Modules
 import * as Crypto from 'crypto';
 import RethinkDB from 'rethinkdb';
 
 // Internal Modules
+import standardiseQuery from './standardiseQuery';
 import standardiseVariables from './StandardiseVariables';
 
 // Types
@@ -25,7 +28,7 @@ interface Index
 export default async function(index: Topology.IndexVariant, indexList: IndexList, table: Topology.Table, connection: RethinkDB.Connection)
 {
 	const indexName = generateIndexName(index);
-	const { indexFunction, indexHash } = generateIndexFunction(index);
+	const { indexFunction, indexHash } = generateIndexFunction({index, indexName});
 	const exists = indexList.includes(indexName);
 	let updated = false;
 	if (exists)
@@ -35,11 +38,11 @@ export default async function(index: Topology.IndexVariant, indexList: IndexList
 			const different = await isIndexDifferent({name: indexName, hash: indexHash, table, connection});
 			if (different)
 			{
-				await RethinkDB.table(table.name).indexDrop(indexName);
+				await RethinkDB.table(table.name).indexDrop(indexName).run(connection);
 				updated = true;
 			};
-		}
-		else
+		};
+		if (!indexHash || (indexHash && !updated))
 		{
 			log('Exists.', indexName, table);
 			return true;
@@ -108,7 +111,7 @@ function mapCompoundIndexName(field: Topology.CompoundIndexField)
 	};
 };
 
-function generateIndexFunction(index: Topology.IndexVariant)
+function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant, indexName: string})
 {
 	let indexFunction: Function | Array<Function>;
 	let indexHash: string;
@@ -120,11 +123,11 @@ function generateIndexFunction(index: Topology.IndexVariant)
 	{
 		if ('convert' in index)
 		{
-			indexFunction = document => document(index.name).coerceTo('number') as Function;
+			indexFunction = RethinkDB.row(index.name).coerceTo('number') as Function;
 		}
 		else if ('arbitrary' in index)
 		{
-			indexFunction = document => index.arbitrary(document) as Function;
+			indexFunction = index.arbitrary(RethinkDB.row);
 		}
 		else
 		{
@@ -134,7 +137,7 @@ function generateIndexFunction(index: Topology.IndexVariant)
 	else
 	{
 		indexFunction = index.compound.map(mapCompoundIndexFunction);
-		indexHash = generateCompoundIndexFunctionHash(indexFunction);
+		indexHash = generateCompoundIndexFunctionHash(indexFunction, indexName);
 	};
 	return {indexFunction, indexHash};
 };
@@ -153,7 +156,7 @@ function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
 		}
 		else if ('arbitrary' in field)
 		{
-			return document => field.arbitrary(document);
+			return field.arbitrary(RethinkDB.row);
 		}
 		else
 		{
@@ -162,11 +165,18 @@ function mapCompoundIndexFunction(field: Topology.CompoundIndexField)
 	};
 };
 
-function generateCompoundIndexFunctionHash(compound: Array<Function>)
+function generateCompoundIndexFunctionHash(compound: Array<Function>, indexName: string)
 {
-	const source = standardiseVariables(compound.map(item => item.toString()).join(''));
-    const hash = generateQueryHash(source);
+	const standardised = standardiseVariables(compound.map(item => item.toString()).join(', '));
+	const encapsulated = encapsulateCompoundIndexQuery(standardised, indexName);
+    const hash = generateQueryHash(encapsulated);
 	return hash;
+};
+
+function encapsulateCompoundIndexQuery(source: string, indexName: string)
+{
+	const encapsulated = 'indexCreate(\'' + indexName + '\', function(var_0) { return r.expr([' + source + ']); })';
+	return encapsulated;
 };
 
 function generateQueryHash(source: string)
@@ -177,8 +187,9 @@ function generateQueryHash(source: string)
 
 async function isIndexDifferent({name, hash, table, connection}: {name: string, hash: string, table: Topology.Table, connection: RethinkDB.Connection})
 {
-	const index: Index = await RethinkDB.table(table.name).indexStatus(name).run(connection);
-	const existingHash = generateQueryHash(standardiseVariables(index.query));
+	const index: Index = await RethinkDB.table(table.name).indexStatus(name).nth(0).run(connection);
+	const existingQuery = standardiseQuery(index.query);
+	const existingHash = generateQueryHash(existingQuery);
 	const different = hash !== existingHash;
 	return different;
 };
