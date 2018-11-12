@@ -57,5 +57,5 @@ export namespace Topology
 	{
 		compound: Array<CompoundIndexField>;
 	};
-	export type CompoundIndexField = string | NameIndex;
+	export type CompoundIndexField = string | NameIndexVariant;
 };
