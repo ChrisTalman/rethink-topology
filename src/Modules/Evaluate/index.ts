@@ -24,6 +24,7 @@ export default async function(topology: Topology.Base)
 	console.log('Disconnecting...');
 	await connection.close();
 	console.log('Disconnect.');
+	await delayForDebugger();
 };
 
 export async function run(topology: Topology.Base, connection: RethinkDB.Connection)
@@ -34,4 +35,11 @@ export async function run(topology: Topology.Base, connection: RethinkDB.Connect
 		return;
 	};
 	await guaranteeTables(topology, connection);
+};
+
+async function delayForDebugger()
+{
+	const attached = process.execArgv.includes('--inspect');
+	if (!attached) return;
+	await new Promise(resolve => setTimeout(resolve, 3000));
 };
