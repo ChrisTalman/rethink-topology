@@ -86,11 +86,9 @@ function generateIndexName(index: Topology.IndexVariant)
 function generateNameIndexName(index: Topology.NameIndexVariant)
 {
 	let type: string;
-	if ('convert' in index && index.convert === Number)
-	{
-		type = 'number';
-	};
-	return index.name + '=>' + type;
+	if ('convert' in index && index.convert === Number) type = 'number';
+	const name = type ? index.name + '=>' + type : index.name;
+	return name;
 };
 
 function mapCompoundIndexName(field: Topology.CompoundIndexField)
