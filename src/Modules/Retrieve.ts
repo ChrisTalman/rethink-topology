@@ -9,12 +9,13 @@ import { Topology } from 'src/Types';
 
 // Constants
 const FILE_NAME = 'topology.config.js';
+const ARBITRARY_INDEX_SCHEMA = Joi.func().optional();
 const NAME_INDEX_SCHEMA = Joi.object
 	(
 		{
 			name: Joi.string().required(),
 			convert: Joi.valid(Number).optional(),
-			arbitrary: Joi.func().optional()
+			arbitrary: ARBITRARY_INDEX_SCHEMA
 		}
 	)
 	.without('convert', ['arbitrary']);
@@ -28,19 +29,14 @@ const SCHEMA = Joi.object
 				.items
 				(
 					{
-						name: Joi.alternatives
-						(
-							Joi.string().required(),
-							NAME_INDEX_SCHEMA
-						),
+						name: Joi.string().required(),
 						indexes: Joi
 							.array()
 							.items
 							(
 								Joi.string(),
+								NAME_INDEX_SCHEMA,
 								{
-									name: Joi.string().optional(),
-									//generator: Joi.alternatives(Joi.array(), Joi.func()).optional(), // Not currently supported.
 									compound: Joi
 										.array()
 										.items
