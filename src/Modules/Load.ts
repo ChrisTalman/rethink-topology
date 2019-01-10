@@ -39,8 +39,9 @@ const INDEXES_SCHEMA = Joi
 		}
 	)
 	.default([]);
-const SHARDS_SCHEMA = Joi.number();
-const REPLICAS_SCHEMA = Joi.number();
+const SHARDS_LIMIT = 64;
+const SHARDS_SCHEMA = Joi.number().integer().greater(0).less(SHARDS_LIMIT - 1);
+const REPLICAS_SCHEMA = Joi.number().integer().greater(0);
 const TABLES_SCHEMA = Joi
 	.array()
 	.items
@@ -74,6 +75,7 @@ const SCHEMA = Joi.object
 		}
 	)
 	.required();
+
 export default async function()
 {
     let source: string;
