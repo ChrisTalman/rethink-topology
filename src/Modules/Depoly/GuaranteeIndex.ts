@@ -5,28 +5,24 @@
 // External Modules
 import * as Crypto from 'crypto';
 import { ulid } from 'ulid';
-import RethinkDB from 'rethinkdb';
+import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Internal Modules
 import standardiseQuery from './standardiseQuery';
 import standardiseVariables from './StandardiseVariables';
 
 // Types
-import { Topology } from 'src/Types';
+import { IndexStatus as BaseIndexStatus, RDatum } from 'rethinkdb-ts';
+import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/Types/Topology';
 import { IndexList } from './GuaranteeIndexes';
-interface Index
+import { Deployment } from './';
+type IndexFunction = (document: RDatum) => any;
+interface IndexStatus extends BaseIndexStatus
 {
-    index: string;
-    ready: boolean;
-    progress: number;
-    function: Buffer;
-    multi: boolean;
-    geo: boolean;
-    outdated: boolean;
 	query: string;
 };
 
-export default async function(index: Topology.IndexVariant, indexList: IndexList, table: Topology.Table, connection: RethinkDB.Connection)
+export default async function(index: IndexVariant, indexList: IndexList, table: Table, deployment: Deployment)
 {
 	const indexName = generateIndexName(index);
 	const { indexFunction, indexHash } = generateIndexFunction({index, indexName});
@@ -36,37 +32,43 @@ export default async function(index: Topology.IndexVariant, indexList: IndexList
 	{
 		if (indexHash)
 		{
-			const different = await isIndexDifferent({name: indexName, hash: indexHash, table, connection});
+			const different = await isIndexDifferent({name: indexName, hash: indexHash, table, deployment});
 			if (different)
 			{
-				await RethinkDB.table(table.name).indexDrop(indexName).run(connection);
+				await dropIndex(table, indexName, deployment);
 				updated = true;
 			};
 		};
 		if (!indexHash || (indexHash && !updated))
 		{
-			log('Exists.', indexName, table);
+			log('Exists.', indexName, table, deployment);
 			return true;
 		};
 	};
-	const query = RethinkDB
-		.table(table.name)
-		.indexCreate(indexName, indexFunction);
-	log(updated ? 'Updating... ' : 'Creating...', indexName, table);
-	try
-	{
-		await query.run(connection);
-	}
-	catch (error)
-	{
-		logError((updated ? 'Update' : 'Creation') + ' failed: ' + error.message, indexName, table);
-		return;
-	};
-	log((updated ? 'Updated' : 'Created') + '.', indexName, table);
-	return true;
+	log(updated ? 'Updating... ' : 'Creating...', indexName, table, deployment);
+	await createIndex(table, indexName, indexFunction, deployment);
+	log((updated ? 'Updated' : 'Created') + '.', indexName, table, deployment);
 };
 
-function generateIndexName(index: Topology.IndexVariant)
+async function dropIndex(table: Table, indexName: string, deployment: Deployment)
+{
+	const query = RethinkDB
+		.db(table.database.name)
+		.table(table.name)
+		.indexDrop(indexName);
+	await query.run(deployment.connection);
+};
+
+async function createIndex(table: Table, indexName: string, indexFunction: IndexFunction, deployment: Deployment)
+{
+	const query = RethinkDB
+		.db(table.database.name)
+		.table(table.name)
+		.indexCreate(indexName, indexFunction);
+	await query.run(deployment.connection);
+};
+
+function generateIndexName(index: IndexVariant)
 {
 	if (typeof index === 'string')
 	{
@@ -83,7 +85,7 @@ function generateIndexName(index: Topology.IndexVariant)
 	};
 };
 
-function generateNameIndexName(index: Topology.NameIndexVariant)
+function generateNameIndexName(index: NameIndexVariant)
 {
 	let type: string;
 	if ('convert' in index && index.convert === Number) type = 'number';
@@ -91,7 +93,7 @@ function generateNameIndexName(index: Topology.NameIndexVariant)
 	return name;
 };
 
-function mapCompoundIndexName(field: Topology.CompoundIndexField)
+function mapCompoundIndexName(field: CompoundIndexField)
 {
 	if (typeof field === 'string')
 	{
@@ -110,19 +112,19 @@ function mapCompoundIndexName(field: Topology.CompoundIndexField)
 	};
 };
 
-function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant, indexName: string})
+function generateIndexFunction({index, indexName}: {index: IndexVariant, indexName: string})
 {
-	let indexFunction: Function;
+	let indexFunction: IndexFunction;
 	let indexHash: string;
 	if (typeof index === 'string')
 	{
-		indexFunction = RethinkDB.row(index) as Function;
+		indexFunction = RethinkDB.row(index) as IndexFunction;
 	}
 	else if ('name' in index)
 	{
 		if ('convert' in index)
 		{
-			indexFunction = RethinkDB.row(index.name).coerceTo('number') as Function;
+			indexFunction = RethinkDB.row(index.name).coerceTo('number') as IndexFunction;
 		}
 		else if ('arbitrary' in index)
 		{
@@ -130,7 +132,7 @@ function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant
 		}
 		else
 		{
-			indexFunction = RethinkDB.row(index.name) as Function;
+			indexFunction = RethinkDB.row(index.name) as IndexFunction;
 		};
 	}
 	else
@@ -141,17 +143,17 @@ function generateIndexFunction({index, indexName}: {index: Topology.IndexVariant
 	return {indexFunction, indexHash};
 };
 
-function mapCompoundIndexFunction({field, document}: {field: Topology.CompoundIndexField, document: any})
+function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField, document: any})
 {
 	if (typeof field === 'string')
 	{
-		return document(field) as Function;
+		return document(field) as IndexFunction;
 	}
 	else
 	{
 		if ('convert' in field)
 		{
-			return document(field.name).coerceTo('number') as Function;
+			return document(field.name).coerceTo('number') as IndexFunction;
 		}
 		else if ('arbitrary' in field)
 		{
@@ -159,7 +161,7 @@ function mapCompoundIndexFunction({field, document}: {field: Topology.CompoundIn
 		}
 		else
 		{
-			return document(field.name) as Function;
+			return document(field.name) as IndexFunction;
 		};
 	};
 };
@@ -202,26 +204,22 @@ function generateQueryHash(source: string)
 	return hash;
 };
 
-async function isIndexDifferent({name, hash, table, connection}: {name: string, hash: string, table: Topology.Table, connection: RethinkDB.Connection})
+async function isIndexDifferent({name, hash, table, deployment}: {name: string, hash: string, table: Table, deployment: Deployment})
 {
-	const index: Index = await RethinkDB.table(table.name).indexStatus(name).nth(0).run(connection);
+	const index = await RethinkDB.table(table.name).indexStatus(name).nth(0).run(deployment.connection) as IndexStatus;
 	const existingQuery = standardiseQuery(index.query);
 	const existingHash = generateQueryHash(existingQuery);
 	const different = hash !== existingHash;
 	return different;
 };
 
-function log(message: string, indexName: string, table: Topology.Table)
+function log(message: string, indexName: string, table: Table, deployment: Deployment)
 {
-	console.log(generateMessage(message, indexName, table));
+	const generated = generateMessage(message, indexName, table);
+	deployment.log(generated);
 };
 
-function logError(message: string, indexName: string, table: Topology.Table)
-{
-	console.error(generateMessage(message, indexName, table));
-};
-
-function generateMessage(message: string, indexName: string, table: Topology.Table)
+function generateMessage(message: string, indexName: string, table: Table)
 {
 	const generated = '[Table][' + table.name + ']' + '[Index][' + indexName + '] ' + message;
 	return generated;
