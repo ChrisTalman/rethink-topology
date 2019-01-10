@@ -33,12 +33,19 @@ async function create(table: Table, deployment: Deployment)
 		(
 			table.name,
 			{
-				shards: deployment.topology.shards,
-				replicas: deployment.topology.replicas
+				shards: getClusterConfig('shards', table, deployment),
+				replicas: getClusterConfig('replicas', table, deployment)
 			}
 		);
 	await query.run(deployment.connection);
 	log('Created.', table, deployment);
+};
+
+/** Returns the shards or replicas value for the table, working up the table-database-config hierarchy as appropriate. */
+function getClusterConfig(parameter: 'shards' | 'replicas', table: Table, deployment: Deployment)
+{
+	const value = (parameter in table && table[parameter]) || (parameter in table.database && table.database[parameter]) || deployment.topology[parameter];
+	return value;
 };
 
 function log(message: string, table: Table, deployment: Deployment)
