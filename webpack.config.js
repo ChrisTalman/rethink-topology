@@ -1,8 +1,12 @@
 'use strict';
 
-const path = require('path');
-const ignore = /(?:node_modules)$/;
+// External Modules
+const Path = require('path');
 const NodeExternals = require('webpack-node-externals');
+
+// Constants
+const TYPESCRIPT_IGNORE = /(?:node_modules)$/;
+const NODE_EXTERNALS_WHITELIST = [/^@bluecewe\/[\w-]+/];
 
 module.exports =
 {
@@ -14,11 +18,7 @@ module.exports =
     },
     resolve:
     {
-        extensions:
-        [
-            '.ts',
-            '.json'
-        ],
+        extensions: ['.ts', '.js', '.json'],
         alias:
         {
             src: __dirname + '/src',
@@ -39,12 +39,12 @@ module.exports =
             {
                 loader: 'ts-loader',
                 test: /\.tsx?$/,
-                exclude: ignore
+                exclude: TYPESCRIPT_IGNORE
             }
         ]
     },
 	externals:
 	[
-		NodeExternals()
+		NodeExternals({whitelist: NODE_EXTERNALS_WHITELIST})
 	]
 };
