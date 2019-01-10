@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@bluecewe/config": "git+https://bitbucket.org/Bluecewe/config.git",
 		"joi": "^13.4.0",
-		"rethinkdb": "^2.3.3",
+		"rethinkdb-ts": "2.4.0-rc.11",
 		"ulid": "^2.3.0"
 	},
 	"scripts": {
