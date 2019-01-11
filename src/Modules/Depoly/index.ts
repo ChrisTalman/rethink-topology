@@ -3,6 +3,7 @@
 // External Modules
 import { r as RethinkDB } from 'rethinkdb-ts';
 import { ulid } from 'ulid';
+import * as Joi from 'joi';
 
 // Internal Modules
 import load from 'src/Modules/Load';
@@ -22,6 +23,35 @@ interface IndexComparisonTable
 {
 	database: string;
 	name: string;
+};
+
+// Constants
+const OPTIONS_SCHEMA =
+{
+	log: Joi.boolean().default(false),
+	rethink: Joi.object
+		(
+			{
+				host: Joi.string().optional(),
+				port: Joi.number().optional(),
+				server: Joi.object().optional(),
+				db: Joi.string().optional(),
+				user: Joi.string().optional(),
+				password: Joi.string().optional(),
+				discovery: Joi.boolean().optional(),
+				pool: Joi.boolean().optional(),
+				buffer: Joi.number().optional(),
+				max: Joi.number().optional(),
+				timeout: Joi.number().optional(),
+				pingInterval: Joi.number().optional(),
+				timeoutError: Joi.number().optional(),
+				timeoutGb: Joi.number().optional(),
+				maxExponent: Joi.number().optional(),
+				silent: Joi.boolean().optional(),
+				log: Joi.func().optional()
+			}
+		)
+		.pattern(/\w/, Joi.any())
 };
 
 /** Loads topology from default location and deploys it to the database provided in the options. */
@@ -58,7 +88,15 @@ export class Deployment
 	constructor({topology, options}: {topology: Topology, options: Options})
 	{
 		this.topology = topology;
-		this.options = options;
+		this.options = this.validateOptions(options);
+	};
+	/** Validates deployment options and returns transformed object with appropriate defaults. */
+	private validateOptions(options: Options)
+	{
+		const validated = Joi.validate(options, OPTIONS_SCHEMA);
+		if (validated.error) throw new Error(validated.error.message);
+		options = validated.value;
+		return options;
 	};
 	/** Initialises the deployment by connecting to the RethinkDB database. */
 	public async initialise()
