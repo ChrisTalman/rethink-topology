@@ -3,46 +3,33 @@
 // To Do: Ensure that standalone arbitrary function indexes function correctly and are also updated when they change.
 
 // External Modules
-import * as Crypto from 'crypto';
-import { ulid } from 'ulid';
 import { r as RethinkDB } from 'rethinkdb-ts';
 
-// Internal Modules
-import standardiseQuery from './standardiseQuery';
-import standardiseVariables from './StandardiseVariables';
-
 // Types
-import { IndexStatus as BaseIndexStatus, RDatum } from 'rethinkdb-ts';
+import { RDatum } from 'rethinkdb-ts';
 import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/Types/Topology';
 import { IndexList } from './GuaranteeIndexes';
 import { Deployment } from './';
 type IndexFunction = (document: RDatum) => any;
-interface IndexStatus extends BaseIndexStatus
-{
-	query: string;
-};
 
 export default async function(index: IndexVariant, indexList: IndexList, table: Table, deployment: Deployment)
 {
 	const indexName = generateIndexName(index);
-	const { indexFunction, indexHash } = generateIndexFunction({index, indexName});
+	const indexFunction = generateIndexFunction({index});
 	const exists = indexList.includes(indexName);
 	let updated = false;
 	if (exists)
 	{
-		if (indexHash)
+		const different = await isIndexDifferent({name: indexName, indexFunction, table, deployment});
+		if (different)
 		{
-			const different = await isIndexDifferent({name: indexName, hash: indexHash, table, deployment});
-			if (different)
-			{
-				await dropIndex(table, indexName, deployment);
-				updated = true;
-			};
-		};
-		if (!indexHash || (indexHash && !updated))
+			await dropIndex(table, indexName, deployment);
+			updated = true;
+		}
+		else
 		{
 			log('Exists.', indexName, table, deployment);
-			return true;
+			return;
 		};
 	};
 	log(updated ? 'Updating... ' : 'Creating...', indexName, table, deployment);
@@ -112,10 +99,9 @@ function mapCompoundIndexName(field: CompoundIndexField)
 	};
 };
 
-function generateIndexFunction({index, indexName}: {index: IndexVariant, indexName: string})
+function generateIndexFunction({index}: {index: IndexVariant})
 {
 	let indexFunction: IndexFunction;
-	let indexHash: string;
 	if (typeof index === 'string')
 	{
 		indexFunction = RethinkDB.row(index) as IndexFunction;
@@ -138,9 +124,8 @@ function generateIndexFunction({index, indexName}: {index: IndexVariant, indexNa
 	else
 	{
 		indexFunction = document => index.compound.map(field => mapCompoundIndexFunction({field, document}));
-		indexHash = generateCompoundIndexFunctionHash(indexFunction, indexName);
 	};
-	return {indexFunction, indexHash};
+	return indexFunction;
 };
 
 function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField, document: any})
@@ -166,51 +151,34 @@ function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField,
 	};
 };
 
-function generateCompoundIndexFunctionHash(compound: Function, indexName: string)
+async function isIndexDifferent({name, indexFunction, table, deployment}: {name: string, indexFunction: IndexFunction, table: Table, deployment: Deployment})
 {
-	const id = ulid();
-	const placeholdered = compound(RethinkDB.expr({placeholder: id})).toString();
-	const variabled = replaceDocumentPlaceholder(placeholdered);
-	const spaced = replaceSpacelessCommas(variabled);
-	const standardised = standardiseVariables(spaced);
-	const encapsulated = encapsulateCompoundIndexQuery(standardised, indexName);
-    const hash = generateQueryHash(encapsulated);
-	return hash;
-};
-
-function replaceDocumentPlaceholder(source: string)
-{
-	const EXPRESSION = /(?:r\(\{"placeholder": "[\w]+"\}\)|{"placeholder": "[\w]+"\})/g;
-	const replaced = source.replace(EXPRESSION, 'var_0');
-	return replaced;
-};
-
-function replaceSpacelessCommas(source: string)
-{
-	const EXPRESSION = /,(?! )/g;
-	const replaced = source.replace(EXPRESSION, match => match + ' ');
-	return replaced;
-};
-
-function encapsulateCompoundIndexQuery(source: string, indexName: string)
-{
-	const encapsulated = 'indexCreate(\'' + indexName + '\', function(var_0) { return r.expr([' + source + ']); })';
-	return encapsulated;
-};
-
-function generateQueryHash(source: string)
-{
-	const hash = Crypto.createHash('sha1').update(source).digest('base64');
-	return hash;
-};
-
-async function isIndexDifferent({name, hash, table, deployment}: {name: string, hash: string, table: Table, deployment: Deployment})
-{
-	const index = await RethinkDB.table(table.name).indexStatus(name).nth(0).run(deployment.connection) as IndexStatus;
-	const existingQuery = standardiseQuery(index.query);
-	const existingHash = generateQueryHash(existingQuery);
-	const different = hash !== existingHash;
+	await createComparisonIndex({name, indexFunction, deployment});
+	const query = RethinkDB
+		.ne
+		(
+			RethinkDB
+				.db(table.database.name)
+				.table(table.name)
+				.indexStatus(name)
+				('function'),
+			RethinkDB
+				.db(deployment.indexComparisonTable.database)
+				.table(deployment.indexComparisonTable.name)
+				.indexStatus(name)
+				('function')
+		);
+	const different = await query.run(deployment.connection);
 	return different;
+};
+
+async function createComparisonIndex({name, indexFunction, deployment}: {name: string, indexFunction: IndexFunction, deployment: Deployment})
+{
+	const query = RethinkDB
+		.db(deployment.indexComparisonTable.database)
+		.table(deployment.indexComparisonTable.name)
+		.indexCreate(name, indexFunction);
+	await query.run(deployment.connection);
 };
 
 function log(message: string, indexName: string, table: Table, deployment: Deployment)
