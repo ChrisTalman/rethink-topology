@@ -26,39 +26,50 @@ interface IndexComparisonTable
 };
 
 // Constants
-const OPTIONS_SCHEMA =
-{
-	log: Joi.boolean().default(false),
-	rethink: Joi.object
-		(
-			{
-				host: Joi.string().optional(),
-				port: Joi.number().optional(),
-				server: Joi.object().optional(),
-				db: Joi.string().optional(),
-				user: Joi.string().optional(),
-				password: Joi.string().optional(),
-				discovery: Joi.boolean().optional(),
-				pool: Joi.boolean().optional(),
-				buffer: Joi.number().optional(),
-				max: Joi.number().optional(),
-				timeout: Joi.number().optional(),
-				pingInterval: Joi.number().optional(),
-				timeoutError: Joi.number().optional(),
-				timeoutGb: Joi.number().optional(),
-				maxExponent: Joi.number().optional(),
-				silent: Joi.boolean().optional(),
-				log: Joi.func().optional()
-			}
-		)
-		.pattern(/\w/, Joi.any())
-};
+const OPTIONS_SCHEMA = Joi.object
+	(
+		{
+			options: Joi.object
+				(
+					{
+						log: Joi.boolean().default(false),
+						rethink: Joi.object
+							(
+								{
+									host: Joi.string().optional(),
+									port: Joi.number().optional(),
+									server: Joi.object().optional(),
+									db: Joi.string().optional(),
+									user: Joi.string().optional(),
+									password: Joi.string().optional(),
+									discovery: Joi.boolean().optional(),
+									pool: Joi.boolean().optional(),
+									buffer: Joi.number().optional(),
+									max: Joi.number().optional(),
+									timeout: Joi.number().optional(),
+									pingInterval: Joi.number().optional(),
+									timeoutError: Joi.number().optional(),
+									timeoutGb: Joi.number().optional(),
+									maxExponent: Joi.number().optional(),
+									silent: Joi.boolean().optional(),
+									log: Joi.func().optional()
+								}
+							)
+							.pattern(/\w/, Joi.any())
+							.required()
+					}
+				)
+				.required()
+		}
+	)
+	.required();
 
 /** Loads topology from default location and deploys it to the database provided in the options. */
-export default async function({options}: {options: Options})
+export default async function({options}: {options: Options} = {options: {} as Options})
 {
 	const topology = await load();
 	const deployment = new Deployment({topology, options});
+	await deployment.initialise();
 	let deploymentError: Error;
 	try
 	{
@@ -88,14 +99,15 @@ export class Deployment
 	constructor({topology, options}: {topology: Topology, options: Options})
 	{
 		this.topology = topology;
-		this.options = this.validateOptions(options);
+		this.options = this.validateOptions({options});
 	};
 	/** Validates deployment options and returns transformed object with appropriate defaults. */
-	private validateOptions(options: Options)
+	private validateOptions({options}: {options: Options})
 	{
-		const validated = Joi.validate(options, OPTIONS_SCHEMA);
+		console.log('Pre Options:', options);
+		const validated = Joi.validate(arguments[0], OPTIONS_SCHEMA);
 		if (validated.error) throw new Error(validated.error.message);
-		options = validated.value;
+		options = validated.value.options;
 		return options;
 	};
 	/** Initialises the deployment by connecting to the RethinkDB database. */
@@ -128,10 +140,10 @@ export class Deployment
 	/** Finishes the deployment by disconnecting from the RethinkDB database. */
 	public async finish()
 	{
+		await this.deleteIndexComparisonTable();
 		this.log('Disconnecting...');
 		await this.connection.close();
 		this.log('Disconnect.');
-		await this.deleteIndexComparisonTable();
 	};
 	/** Deletes index comparsion table. */
 	private async deleteIndexComparisonTable()
