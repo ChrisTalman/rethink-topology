@@ -189,6 +189,6 @@ function log(message: string, indexName: string, table: Table, deployment: Deplo
 
 function generateMessage(message: string, indexName: string, table: Table)
 {
-	const generated = '[Table][' + table.name + ']' + '[Index][' + indexName + '] ' + message;
+	const generated = '[' + table.database.name + '][' + table.name + ']' + '[' + indexName + '] ' + message;
 	return generated;
 };
