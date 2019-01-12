@@ -56,6 +56,6 @@ function log(message: string, table: Table, deployment: Deployment)
 
 function generateMessage(message: string, table: Table)
 {
-	const generated = '[Table][' + table.name + '] ' + message;
+	const generated = '[' + table.database.name + '][' + table.name + '] ' + message;
 	return generated;
 };
