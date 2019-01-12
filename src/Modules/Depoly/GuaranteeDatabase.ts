@@ -55,6 +55,6 @@ function log(message: string, database: Database, deployment: Deployment)
 
 function generateMessage(message: string, database: Database)
 {
-	const generated = '[Database][' + database.name + '] ' + message;
+	const generated = '[' + database.name + '] ' + message;
 	return generated;
 };
