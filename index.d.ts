@@ -2,8 +2,6 @@
 
 // Types
 import { RConnectionOptions } from 'rethinkdb-ts';
-
-/** Loads topology from default location and deploys it to the database provided in the options. */
 declare module '@bluecewe/rethink-topology'
 {
     export interface Options
@@ -13,5 +11,6 @@ declare module '@bluecewe/rethink-topology'
     	/** RethinkDB connection options. */
     	rethink: RConnectionOptions;
     }
+    /** Loads topology from default location and deploys it to the database provided in the options. */
     export function deploy({options}: {options: Options}): Promise<void>;
 }
