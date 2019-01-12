@@ -104,7 +104,6 @@ export class Deployment
 	/** Validates deployment options and returns transformed object with appropriate defaults. */
 	private validateOptions({options}: {options: Options})
 	{
-		console.log('Pre Options:', options);
 		const validated = Joi.validate(arguments[0], OPTIONS_SCHEMA);
 		if (validated.error) throw new Error(validated.error.message);
 		options = validated.value.options;
