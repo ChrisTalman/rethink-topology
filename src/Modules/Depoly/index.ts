@@ -148,9 +148,8 @@ export class Deployment
 			(
 				RethinkDB
 					.dbList()
-					.filter(database.name)
-					.count()
-					.gt(0),
+					.contains(database.name)
+					.eq(false),
 				RethinkDB
 					.dbCreate(database.name),
 				true
