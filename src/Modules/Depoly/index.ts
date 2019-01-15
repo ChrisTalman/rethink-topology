@@ -1,5 +1,8 @@
 'use strict';
 
+// To Do: Create users specified in topology config file, using passwords from separte passwords file.
+// To Do: Check own user permissions before any operations (including index comparison).
+
 // External Modules
 import { r as RethinkDB } from 'rethinkdb-ts';
 import { ulid } from 'ulid';
@@ -11,7 +14,7 @@ import guaranteeDatabases from './GuaranteeDatabases';
 
 // Types
 import { Connection, RConnectionOptions } from 'rethinkdb-ts';
-import { Topology } from 'src/Types/Topology';
+import { Topology, Database } from 'src/Types/Topology';
 interface Options
 {
 	/** Log debugging events to console.log(). */
@@ -124,6 +127,7 @@ export class Deployment
 		const id = ulid();
 		const name = 'Topology_IndexComparison_' + id;
 		const database = this.topology.databases[0];
+		await this.guaranteeIndexComparisonDatabase({database});
 		const query = RethinkDB
 			.db(database.name)
 			.tableCreate(name);
@@ -135,6 +139,23 @@ export class Deployment
 			database: database.name,
 			name
 		};
+	};
+	/** Guarantees that the index comparison database exists, creating it if it doesn't. */
+	private async guaranteeIndexComparisonDatabase({database}: {database: Database})
+	{
+		const query = RethinkDB
+			.branch
+			(
+				RethinkDB
+					.dbList()
+					.filter(database.name)
+					.count()
+					.gt(0),
+				RethinkDB
+					.dbCreate(database.name),
+				true
+			);
+		await query.run(this.connection);
 	};
 	/** Finishes the deployment by disconnecting from the RethinkDB database. */
 	public async finish()
