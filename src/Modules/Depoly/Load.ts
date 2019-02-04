@@ -42,6 +42,16 @@ const INDEXES_SCHEMA = Joi
 const SHARDS_LIMIT = 64;
 const SHARDS_SCHEMA = Joi.number().integer().greater(0).less(SHARDS_LIMIT - 1);
 const REPLICAS_SCHEMA = Joi.number().integer().greater(0);
+const TABLE_USER_SCHEMA = Joi
+	.object
+	(
+		{
+			username: Joi.string().required(),
+			config: Joi.boolean().optional(),
+			read: Joi.boolean().optional(),
+			write: Joi.boolean().optional()
+		}
+	);
 const TABLES_SCHEMA = Joi
 	.array()
 	.items
@@ -50,11 +60,20 @@ const TABLES_SCHEMA = Joi
 			name: Joi.string().required(),
 			shards: SHARDS_SCHEMA.optional(),
 			replicas: REPLICAS_SCHEMA.optional(),
+			users: Joi.array().items(TABLE_USER_SCHEMA).default([]),
 			indexes: INDEXES_SCHEMA
 		}
 	)
 	.min(1)
 	.required();
+const DATABASE_USER_SCHEMA = Joi
+	.object
+	(
+		{
+			username: Joi.string().required(),
+			config: Joi.boolean().optional()
+		}
+	);
 const DATABASES_SCHEMA = Joi
 	.array()
 	.items
@@ -63,7 +82,17 @@ const DATABASES_SCHEMA = Joi
 			name: Joi.string().required(),
 			shards: SHARDS_SCHEMA.optional(),
 			replicas: REPLICAS_SCHEMA.optional(),
+			users: Joi.array().items(DATABASE_USER_SCHEMA).default([]),
 			tables: TABLES_SCHEMA
+		}
+	);
+const GLOBAL_USER_SCHEMA = Joi
+	.object
+	(
+		{
+			username: Joi.string().required(),
+			config: Joi.boolean().optional(),
+			connect: Joi.boolean().optional()
 		}
 	);
 const SCHEMA = Joi.object
@@ -71,12 +100,14 @@ const SCHEMA = Joi.object
 		{
 			shards: SHARDS_SCHEMA.default(1),
 			replicas: REPLICAS_SCHEMA.default(1),
+			users: Joi.array().items(Joi.string(), GLOBAL_USER_SCHEMA).default([]),
 			databases: DATABASES_SCHEMA
 		}
 	)
 	.required();
 
-export default async function()
+/** Fetches and validates topology from file. */
+export default async function load()
 {
     let source: string;
 	try

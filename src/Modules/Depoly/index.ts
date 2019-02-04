@@ -9,7 +9,7 @@ import { ulid } from 'ulid';
 import * as Joi from 'joi';
 
 // Internal Modules
-import load from 'src/Modules/Load';
+import load from './Load';
 import guaranteeDatabases from './GuaranteeDatabases';
 
 // Types
