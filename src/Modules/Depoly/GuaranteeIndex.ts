@@ -8,8 +8,8 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 // Types
 import { RDatum } from 'rethinkdb-ts';
 import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/Types/Topology';
+import Deployment from './Deployment';
 import { IndexList } from './GuaranteeIndexes';
-import { Deployment } from './';
 type IndexFunction = (document: RDatum) => any;
 
 export default async function(index: IndexVariant, indexList: IndexList, table: Table, deployment: Deployment)

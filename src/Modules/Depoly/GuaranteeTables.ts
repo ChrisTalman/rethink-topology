@@ -8,7 +8,7 @@ import guaranteeTable from './GuaranteeTable';
 
 // Types
 import { Database } from 'src/Types/Topology';
-import { Deployment } from './';
+import Deployment from './Deployment';
 export interface TableList extends Array<string> {};
 export interface TablePromises extends Array<TablePromise> {};
 export interface TablePromise extends Promise<boolean> {};

@@ -8,8 +8,8 @@ import guaranteeIndexes from './GuaranteeIndexes';
 
 // Types
 import { Table } from 'src/Types/Topology';
+import Deployment from './Deployment';
 import { TableList } from './GuaranteeTables';
-import { Deployment } from './';
 
 export default async function(table: Table, tableList: TableList, deployment: Deployment)
 {

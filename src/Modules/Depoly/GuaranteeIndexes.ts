@@ -8,7 +8,7 @@ import guaranteeIndex from './GuaranteeIndex';
 
 // Types
 import { Table } from 'src/Types/Topology';
-import { Deployment } from './';
+import Deployment from './Deployment';
 export interface IndexList extends Array<string> {};
 
 export default async function(table: Table, deployment: Deployment)

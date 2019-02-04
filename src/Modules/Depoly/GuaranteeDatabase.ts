@@ -4,7 +4,7 @@
 import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Internal Modules
-import { Deployment } from './';
+import Deployment from './Deployment';
 import guaranteeTables from './GuaranteeTables';
 
 // Types

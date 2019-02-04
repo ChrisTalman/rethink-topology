@@ -1,7 +1,7 @@
 'use strict';
 
 // Internal Modules
-import { Deployment } from './';
+import Deployment from './Deployment';
 import guaranteeDatabase from './GuaranteeDatabase';
 
 export default async function(deployment: Deployment)
