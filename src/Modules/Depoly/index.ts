@@ -6,6 +6,7 @@
 // Internal Modules
 import load from './Load';
 import Deployment from './Deployment';
+import guaranteeUsers from './GuaranteeUsers';
 import guaranteeDatabases from './GuaranteeDatabases';
 
 // Types
@@ -34,5 +35,6 @@ export default async function({options}: {options: Options} = {options: {} as Op
 /** Deploys deployment. */
 export async function deploy(deployment: Deployment)
 {
+	await guaranteeUsers({deployment});
 	await guaranteeDatabases(deployment);
 };
