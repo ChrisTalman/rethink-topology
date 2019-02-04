@@ -6,6 +6,8 @@ declare module '@bluecewe/rethink-topology'
 {
     export interface Options
     {
+    	/** Determines whether the default database 'tests' should be deleted. */
+    	deleteDefaultDatabase?: boolean;
     	/** Log debugging events to console.log(). */
     	log?: boolean;
     	/** RethinkDB connection options. */

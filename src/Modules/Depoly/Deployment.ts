@@ -9,6 +9,7 @@ import * as Joi from 'joi';
 const OPTIONS_SCHEMA = Joi.object
 	(
 		{
+			deleteDefaultDatabase: Joi.boolean().default(true),
 			log: Joi.boolean().default(false),
 			rethink: Joi.object
 				(
@@ -37,12 +38,15 @@ const OPTIONS_SCHEMA = Joi.object
 	)
 	.required()
 	.label('options');
+const DATABASE_NOT_FOUND_ERROR_MESSAGE_EXPRESSION = /Database `.+` does not exist./;
 
 // Types
 import { Connection, RConnectionOptions } from 'rethinkdb-ts';
 import { Topology, Database } from 'src/Types/Topology';
 export interface Options
 {
+	/** Determines whether the default database 'tests' should be deleted. */
+	deleteDefaultDatabase?: boolean;
 	/** Log debugging events to console.log(). */
 	log?: boolean;
 	/** RethinkDB connection options. */
@@ -81,7 +85,28 @@ export default class Deployment
 		const connection = await RethinkDB.connect(this.options.rethink);
 		this.connection = connection;
 		this.log('Connected.');
+		await this.deleteDefaultDatabase();
 		await this.initialiseIndexComparisonTable();
+	};
+	/** Deletes default database 'tests' if determined by options. */
+	private async deleteDefaultDatabase()
+	{
+		if (!this.options.deleteDefaultDatabase) return;
+		this.log('Deleting default database \'tests\'...');
+		const query = RethinkDB.dbDrop('tests');
+		try
+		{
+			await query.run(this.connection);
+		}
+		catch (error)
+		{
+			const notFound = typeof error === 'object' && error !== null && 'msg' in error && typeof error.msg === 'string' && DATABASE_NOT_FOUND_ERROR_MESSAGE_EXPRESSION.test(error.msg);
+			if (notFound) return;
+			const originalErrorMessage = 'message' in error ? error.message : error;
+			const contextualisedErrorMessage = 'Failed to delete default database: ' + originalErrorMessage;
+			throw new Error(contextualisedErrorMessage);
+		};
+		this.log('Deleted default database \'tests\'.');
 	};
 	/** Creates table for index comparison during deployment. */
 	private async initialiseIndexComparisonTable()
