@@ -14,6 +14,7 @@
 		"webpack-node-externals": "^1.7.2"
 	},
 	"dependencies": {
+		"@bluecewe/config": "bitbucket:bluecewe/config",
 		"joi": "^13.4.0",
 		"rethinkdb-ts": "2.4.0-rc.11",
 		"ulid": "^2.3.0"
