@@ -13,7 +13,7 @@ import guaranteeDatabases from './GuaranteeDatabases';
 import { Options } from './Deployment';
 
 /** Loads topology from default location and deploys it to the database provided in the options. */
-export default async function({options}: {options: Options} = {options: {} as Options})
+export default async function({options}: {options: Options})
 {
 	const topology = await load();
 	const deployment = new Deployment({topology, options});
