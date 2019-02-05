@@ -74,9 +74,9 @@ export default class Deployment
 	/** Validates deployment options and returns transformed object with appropriate defaults. */
 	private validateOptions({options}: {options: Options})
 	{
-		const validated = Joi.validate(arguments[0], OPTIONS_SCHEMA);
+		const validated = Joi.validate(options, OPTIONS_SCHEMA);
 		if (validated.error) throw new Error(validated.error.message);
-		options = validated.value.options;
+		options = validated.value;
 		return options;
 	};
 	/** Initialises the deployment by connecting to the RethinkDB database. */
