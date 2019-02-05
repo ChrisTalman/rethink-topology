@@ -32,6 +32,7 @@ const SCHEMA = Joi
 export default async function({deployment}: {deployment: Deployment})
 {
 	validateUserDeclarations({deployment});
+	if (deployment.topology.users.length === 0) return;
     const passwords = await load();
 	await Promise.all
 	(
@@ -121,7 +122,9 @@ async function load()
     }
     catch (error)
     {
-        throw new PasswordsFileError(error);
+		const nodeError: NodeJS.ErrnoException = error;
+		if (nodeError.code === 'ENOENT') throw new PasswordsFileNotFoundError(error);
+        else throw new PasswordsFileError(error);
     };
 	let passwords: Passwords;
 	try
@@ -138,6 +141,14 @@ async function load()
 };
 
 class PasswordsFileError extends Error
+{
+	constructor(error: Error)
+	{
+		super(error.message);
+	};
+};
+
+class PasswordsFileNotFoundError extends Error
 {
 	constructor(error: Error)
 	{
