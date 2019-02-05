@@ -94,7 +94,7 @@ async function guaranteeUserPermissions({user, username, deployment}: {user: str
 export function generatePermissions({user}: {user: string | GlobalUser | DatabaseUser | TableUser})
 {
 	let permissions: { [permission: string]: boolean } = {};
-	if (typeof user !== 'object')
+	if (typeof user === 'object')
 	{
 		for (let permission of Object.keys(user))
 		{
