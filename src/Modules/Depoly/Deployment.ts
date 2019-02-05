@@ -40,6 +40,7 @@ const OPTIONS_SCHEMA = Joi.object
 	.required()
 	.label('options');
 const DATABASE_NOT_FOUND_ERROR_MESSAGE_EXPRESSION = /Database `.+` does not exist./;
+const DEFAULT_DATABASE_NAME = 'test';
 
 // Types
 import { Connection, RConnectionOptions } from 'rethinkdb-ts';
@@ -113,7 +114,7 @@ export default class Deployment
 	{
 		if (!this.options.deleteDefaultDatabase) return;
 		this.log('Deleting default database \'tests\'...');
-		const query = RethinkDB.dbDrop('tests');
+		const query = RethinkDB.dbDrop(DEFAULT_DATABASE_NAME);
 		try
 		{
 			await query.run(this.connection);
