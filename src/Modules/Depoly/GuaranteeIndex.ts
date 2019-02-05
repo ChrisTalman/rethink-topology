@@ -153,7 +153,7 @@ function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField,
 
 async function isIndexDifferent({name, indexFunction, table, tableId, deployment}: {name: string, indexFunction: IndexFunction, table: Table, tableId: string, deployment: Deployment})
 {
-	const comparisonIndexName = await createComparisonIndex({name, indexFunction, table, tableId, deployment});
+	const comparisonIndexName = await createComparisonIndex({name, indexFunction, tableId, deployment});
 	const query = RethinkDB
 		.ne
 		(
@@ -172,7 +172,7 @@ async function isIndexDifferent({name, indexFunction, table, tableId, deployment
 	return different;
 };
 
-async function createComparisonIndex({name, indexFunction, table, tableId, deployment}: {name: string, indexFunction: IndexFunction, table: Table, tableId: string, deployment: Deployment})
+async function createComparisonIndex({name, indexFunction, tableId, deployment}: {name: string, indexFunction: IndexFunction, tableId: string, deployment: Deployment})
 {
 	const comparisonIndexName = name + '-' + tableId;
 	const query = RethinkDB
