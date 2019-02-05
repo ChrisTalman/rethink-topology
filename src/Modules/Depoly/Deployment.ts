@@ -4,6 +4,7 @@
 import { r as RethinkDB } from 'rethinkdb-ts';
 import { ulid } from 'ulid';
 import * as Joi from 'joi';
+import Config from '@bluecewe/config';
 
 // Constants
 const OPTIONS_SCHEMA = Joi.object
@@ -49,8 +50,8 @@ export interface Options
 	deleteDefaultDatabase?: boolean;
 	/** Log debugging events to console.log(). */
 	log?: boolean;
-	/** RethinkDB connection options. */
-	rethink: RConnectionOptions;
+	/** RethinkDB connection options. If string, used as JSON file path from which to obtain connection object. */
+	rethink: string | RConnectionOptions;
 };
 interface IndexComparisonTable
 {
@@ -82,7 +83,26 @@ export default class Deployment
 	public async initialise()
 	{
 		this.log('Connecting...');
-		const connection = await RethinkDB.connect(this.options.rethink);
+		let rethinkConnectionOptions: RConnectionOptions;
+		if (typeof this.options.rethink === 'string')
+		{
+			const config = new Config <RConnectionOptions> ({initialise: false, schema: false, file: this.options.rethink});
+			try
+			{
+				await config.initialise();
+			}
+			catch (error)
+			{
+				throw new ConnectionConfigFileError(error);
+			};
+			const data = config.data;
+			rethinkConnectionOptions = data;
+		}
+		else
+		{
+			rethinkConnectionOptions = this.options.rethink;
+		};
+		const connection = await RethinkDB.connect(rethinkConnectionOptions);
 		this.connection = connection;
 		this.log('Connected.');
 		await this.deleteDefaultDatabase();
@@ -166,5 +186,14 @@ export default class Deployment
 	{
 		if (!this.options.log) return;
 		console.log(... messages);
+	};
+};
+
+export class ConnectionConfigFileError extends Error
+{
+	constructor(error: Error)
+	{
+		const message = 'RethinkDB connection options file error: ' + error.message;
+		super(message);
 	};
 };

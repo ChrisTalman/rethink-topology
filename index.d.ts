@@ -10,9 +10,10 @@ declare module '@bluecewe/rethink-topology'
     	deleteDefaultDatabase?: boolean;
     	/** Log debugging events to console.log(). */
     	log?: boolean;
-    	/** RethinkDB connection options. */
-    	rethink: RConnectionOptions;
+    	/** RethinkDB connection options. If string, used as JSON file path from which to obtain connection object. */
+    	rethink: string | RConnectionOptions;
     }
     /** Loads topology from default location and deploys it to the database provided in the options. */
     export function deploy({options}: {options: Options}): Promise<void>;
+    export class ConnectionConfigFileError extends Error {}
 }
