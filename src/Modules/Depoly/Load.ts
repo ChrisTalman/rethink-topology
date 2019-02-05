@@ -125,7 +125,7 @@ export default async function load()
 	}
 	catch (error)
 	{
-		throw new TopologyEvaluationError(error.message);
+		throw new TopologyEvaluationError(error);
 	};
 	const validated = Joi.validate(topology, SCHEMA);
 	if (validated.error) throw new TopologySchemaError(validated.error.message);
