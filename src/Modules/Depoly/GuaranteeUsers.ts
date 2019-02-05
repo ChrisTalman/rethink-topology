@@ -10,10 +10,14 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 import Deployment from './Deployment';
 
 // Types
-import { GlobalUser } from 'src/Types/Topology';
+import { GlobalUser, DatabaseUser, TableUser } from 'src/Types/Topology';
 interface Passwords
 {
 	[username: string]: string;
+};
+interface GlobalUsersDictionary
+{
+	[username: string]: true;
 };
 
 // Constants
@@ -27,6 +31,7 @@ const SCHEMA = Joi
 /** Guarantees users globally. */
 export default async function({deployment}: {deployment: Deployment})
 {
+	validateUserDeclarations({deployment});
     const passwords = await load();
 	await Promise.all
 	(
@@ -35,6 +40,37 @@ export default async function({deployment}: {deployment: Deployment})
 			user => guaranteeUser({user, passwords, deployment})
 		)
 	);
+};
+
+/** Validates that all users in every part of the topology are globally declared, throwing an exception if not. */
+function validateUserDeclarations({deployment}: {deployment: Deployment})
+{
+	const globalUsersDictionary = generateGlobalUsersDictionary({deployment});
+	for (let database of deployment.topology.databases)
+	{
+		for (let user of database.users)
+		{
+			if (!globalUsersDictionary.hasOwnProperty(user.username)) throw new UserUndeclared({username: user.username});
+		};
+		for (let table of database.tables)
+		{
+			for (let user of table.users)
+			{
+				if (!globalUsersDictionary.hasOwnProperty(user.username)) throw new UserUndeclared({username: user.username});
+			};
+		};
+	};
+};
+
+function generateGlobalUsersDictionary({deployment}: {deployment: Deployment})
+{
+	const dictionary: GlobalUsersDictionary = {};
+	for (let user of deployment.topology.users)
+	{
+		const username = typeof user === 'string' ? user : user.username;
+		dictionary[username] = true;
+	};
+	return dictionary;
 };
 
 async function guaranteeUser({user, passwords, deployment}: {user: string | GlobalUser, passwords: Passwords, deployment: Deployment})
@@ -54,7 +90,7 @@ async function guaranteeUserPermissions({user, username, deployment}: {user: str
 	await query.run(deployment.connection);
 };
 
-function generatePermissions({user}: {user: string | GlobalUser})
+export function generatePermissions({user}: {user: string | GlobalUser | DatabaseUser | TableUser})
 {
 	let permissions: { [permission: string]: boolean } = {};
 	if (typeof user !== 'object')
@@ -119,7 +155,7 @@ class PasswordsJsonError extends Error
 
 class PasswordsSchemaError extends Error
 {
-	constructor(message)
+	constructor(message: string)
 	{
 		super(message);
 	};
@@ -130,6 +166,15 @@ class PasswordNotFound extends Error
 	constructor({username}: {username: string})
 	{
 		const message = 'Password not found for \'' + username + '\'';
+		super(message);
+	};
+};
+
+class UserUndeclared extends Error
+{
+	constructor({username}: {username: string})
+	{
+		const message = 'User undeclared for \'' + username + '\'';
 		super(message);
 	};
 };

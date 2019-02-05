@@ -6,9 +6,10 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 // Internal Modules
 import Deployment from './Deployment';
 import guaranteeTables from './GuaranteeTables';
+import { generatePermissions } from './GuaranteeUsers';
 
 // Types
-import { Database } from 'src/Types/Topology';
+import { Database, DatabaseUser } from 'src/Types/Topology';
 
 export default async function(database: Database, deployment: Deployment)
 {
@@ -27,6 +28,7 @@ async function guarantee(database: Database, deployment: Deployment)
 	log('Creating...', database, deployment);
 	await create(database, deployment);
 	log('Created.', database, deployment);
+	await guaranteeUsers({database, deployment});
 };
 
 async function doesExist(database: Database, deployment: Deployment)
@@ -44,6 +46,20 @@ async function create(database: Database, deployment: Deployment)
 {
 	const query = RethinkDB
 		.dbCreate(database.name);
+	await query.run(deployment.connection);
+};
+
+async function guaranteeUsers({database, deployment}: {database: Database, deployment: Deployment})
+{
+	await Promise.all(database.users.map(user => guaranteeUser({user, database, deployment})));
+};
+
+async function guaranteeUser({user, database, deployment}: {user: DatabaseUser, database: Database, deployment: Deployment})
+{
+	const permissions = generatePermissions({user});
+	const query = RethinkDB
+		.db(database.name)
+		.grant(user.username, permissions);
 	await query.run(deployment.connection);
 };
 

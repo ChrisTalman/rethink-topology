@@ -5,9 +5,10 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Internal Modules
 import guaranteeIndexes from './GuaranteeIndexes';
+import { generatePermissions } from './GuaranteeUsers';
 
 // Types
-import { Table } from 'src/Types/Topology';
+import { Table, TableUser } from 'src/Types/Topology';
 import Deployment from './Deployment';
 import { TableList } from './GuaranteeTables';
 
@@ -22,6 +23,7 @@ async function guarantee(table: Table, tableList: TableList, deployment: Deploym
 	const exists = tableList.includes(table.name);
 	if (exists) log('Exists.', table, deployment);
 	else await create(table, deployment);
+	await guaranteeUsers({table, deployment});
 };
 
 async function create(table: Table, deployment: Deployment)
@@ -46,6 +48,20 @@ function getClusterConfig(parameter: 'shards' | 'replicas', table: Table, deploy
 {
 	const value = (parameter in table && table[parameter]) || (parameter in table.database && table.database[parameter]) || deployment.topology[parameter];
 	return value;
+};
+
+async function guaranteeUsers({table, deployment}: {table: Table, deployment: Deployment})
+{
+	await Promise.all(table.users.map(user => guaranteeUser({user, table, deployment})));
+};
+
+async function guaranteeUser({user, table, deployment}: {user: TableUser, table: Table, deployment: Deployment})
+{
+	const permissions = generatePermissions({user});
+	const query = RethinkDB
+		.db(table.name)
+		.grant(user.username, permissions);
+	await query.run(deployment.connection);
 };
 
 function log(message: string, table: Table, deployment: Deployment)
