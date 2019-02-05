@@ -11,10 +11,10 @@ import { Table } from 'src/Types/Topology';
 import Deployment from './Deployment';
 export interface IndexList extends Array<string> {};
 
-export default async function(table: Table, deployment: Deployment)
+export default async function({table, tableId, deployment}: {table: Table, tableId: string, deployment: Deployment})
 {
 	const indexList = await getIndexList(table, deployment);
-	await Promise.all(table.indexes.map(index => guaranteeIndex(index, indexList, table, deployment)));
+	await Promise.all(table.indexes.map(index => guaranteeIndex({index, indexList, table, tableId, deployment})));
 };
 
 async function getIndexList(table: Table, deployment: Deployment)

@@ -12,7 +12,7 @@ import Deployment from './Deployment';
 import { IndexList } from './GuaranteeIndexes';
 type IndexFunction = (document: RDatum) => any;
 
-export default async function(index: IndexVariant, indexList: IndexList, table: Table, deployment: Deployment)
+export default async function({index, indexList, table, tableId, deployment}: {index: IndexVariant, indexList: IndexList, table: Table, tableId: string, deployment: Deployment})
 {
 	const indexName = generateIndexName(index);
 	const indexFunction = generateIndexFunction({index});
@@ -20,7 +20,7 @@ export default async function(index: IndexVariant, indexList: IndexList, table: 
 	let updated = false;
 	if (exists)
 	{
-		const different = await isIndexDifferent({name: indexName, indexFunction, table, deployment});
+		const different = await isIndexDifferent({name: indexName, indexFunction, table, tableId, deployment});
 		if (different)
 		{
 			await dropIndex(table, indexName, deployment);
@@ -151,9 +151,9 @@ function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField,
 	};
 };
 
-async function isIndexDifferent({name, indexFunction, table, deployment}: {name: string, indexFunction: IndexFunction, table: Table, deployment: Deployment})
+async function isIndexDifferent({name, indexFunction, table, tableId, deployment}: {name: string, indexFunction: IndexFunction, table: Table, tableId: string, deployment: Deployment})
 {
-	await createComparisonIndex({name, indexFunction, deployment});
+	const comparisonIndexName = await createComparisonIndex({name, indexFunction, table, tableId, deployment});
 	const query = RethinkDB
 		.ne
 		(
@@ -165,20 +165,22 @@ async function isIndexDifferent({name, indexFunction, table, deployment}: {name:
 			RethinkDB
 				.db(deployment.indexComparisonTable.database)
 				.table(deployment.indexComparisonTable.name)
-				.indexStatus(name)
+				.indexStatus(comparisonIndexName)
 				('function')
 		);
 	const different = await query.run(deployment.connection);
 	return different;
 };
 
-async function createComparisonIndex({name, indexFunction, deployment}: {name: string, indexFunction: IndexFunction, deployment: Deployment})
+async function createComparisonIndex({name, indexFunction, table, tableId, deployment}: {name: string, indexFunction: IndexFunction, table: Table, tableId: string, deployment: Deployment})
 {
+	const comparisonIndexName = name + '-' + tableId;
 	const query = RethinkDB
 		.db(deployment.indexComparisonTable.database)
 		.table(deployment.indexComparisonTable.name)
-		.indexCreate(name, indexFunction);
+		.indexCreate(comparisonIndexName, indexFunction);
 	await query.run(deployment.connection);
+	return comparisonIndexName;
 };
 
 function log(message: string, indexName: string, table: Table, deployment: Deployment)

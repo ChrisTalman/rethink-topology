@@ -12,21 +12,30 @@ import { Table, TableUser } from 'src/Types/Topology';
 import Deployment from './Deployment';
 import { TableList } from './GuaranteeTables';
 
-export default async function(table: Table, tableList: TableList, deployment: Deployment)
+export default async function({table, tableList, deployment}: {table: Table, tableList: TableList, deployment: Deployment})
 {
-	await guarantee(table, tableList, deployment);
-	await guaranteeIndexes(table, deployment);
+	const tableId = await guarantee({table, tableList, deployment});
+	await guaranteeIndexes({table, tableId, deployment});
 };
 
-async function guarantee(table: Table, tableList: TableList, deployment: Deployment)
+async function guarantee({table, tableList, deployment}: {table: Table, tableList: TableList, deployment: Deployment})
 {
-	const exists = tableList.includes(table.name);
-	if (exists) log('Exists.', table, deployment);
-	else await create(table, deployment);
-	await guaranteeUsers({table, deployment});
+	let tableId: string;
+	const tableConfigItem = tableList.find(item => item.name === table.name);
+	if (tableConfigItem)
+	{
+		log('Exists.', table, deployment);
+		tableId = tableConfigItem.id;
+	}
+	else
+	{
+		tableId = await create({table, deployment});
+	};
+	await guaranteeUsers({table, tableId, deployment});
+	return tableId;
 };
 
-async function create(table: Table, deployment: Deployment)
+async function create({table, deployment}: {table: Table, deployment: Deployment})
 {
 	log('Creating...', table, deployment);
 	const query = RethinkDB
@@ -39,8 +48,10 @@ async function create(table: Table, deployment: Deployment)
 				replicas: getClusterConfig('replicas', table, deployment)
 			}
 		);
-	await query.run(deployment.connection);
+	const result = await query.run(deployment.connection);
 	log('Created.', table, deployment);
+	const id = result.config_changes[0].new_val.id;
+	return id;
 };
 
 /** Returns the shards or replicas value for the table, working up the table-database-config hierarchy as appropriate. */
@@ -50,7 +61,7 @@ function getClusterConfig(parameter: 'shards' | 'replicas', table: Table, deploy
 	return value;
 };
 
-async function guaranteeUsers({table, deployment}: {table: Table, deployment: Deployment})
+async function guaranteeUsers({table, deployment}: {table: Table, tableId: string, deployment: Deployment})
 {
 	await Promise.all(table.users.map(user => guaranteeUser({user, table, deployment})));
 };

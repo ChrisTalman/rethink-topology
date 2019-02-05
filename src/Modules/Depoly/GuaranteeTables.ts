@@ -9,21 +9,28 @@ import guaranteeTable from './GuaranteeTable';
 // Types
 import { Database } from 'src/Types/Topology';
 import Deployment from './Deployment';
-export interface TableList extends Array<string> {};
+export interface TableList extends Array<TableListItem> {};
+export interface TableListItem
+{
+	id: string;
+	name: string;
+};
 export interface TablePromises extends Array<TablePromise> {};
 export interface TablePromise extends Promise<boolean> {};
 
 export default async function(database: Database, deployment: Deployment)
 {
-	const list = await getTableList(database, deployment);
-	await Promise.all(database.tables.map(table => guaranteeTable(table, list, deployment)));
+	const tableList = await getTableList(database, deployment);
+	await Promise.all(database.tables.map(table => guaranteeTable({table, tableList, deployment})));
 };
 
 async function getTableList(database: Database, deployment: Deployment)
 {
 	const query = RethinkDB
-		.db(database.name)
-		.tableList();
-	const list: TableList = await query.run(deployment.connection);
+		.db('rethinkdb')
+		.table('table_config')
+		.filter({db: database.name})
+		.pluck('id', 'name');
+	const list = (await query.run(deployment.connection)) as TableList;
 	return list;
 };
