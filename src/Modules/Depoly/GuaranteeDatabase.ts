@@ -23,11 +23,13 @@ async function guarantee(database: Database, deployment: Deployment)
     if (exists)
 	{
 		log('Exists.', database, deployment);
-		return;
+	}
+	else
+	{
+		log('Creating...', database, deployment);
+		await create(database, deployment);
+		log('Created.', database, deployment);
 	};
-	log('Creating...', database, deployment);
-	await create(database, deployment);
-	log('Created.', database, deployment);
 	await guaranteeUsers({database, deployment});
 };
 
