@@ -71,7 +71,9 @@ const DATABASE_USER_SCHEMA = Joi
 	(
 		{
 			username: Joi.string().required(),
-			config: Joi.boolean().optional()
+			config: Joi.boolean().optional(),
+			read: Joi.boolean().optional(),
+			write: Joi.boolean().optional()
 		}
 	);
 const DATABASES_SCHEMA = Joi
@@ -92,7 +94,9 @@ const GLOBAL_USER_SCHEMA = Joi
 		{
 			username: Joi.string().required(),
 			config: Joi.boolean().optional(),
-			connect: Joi.boolean().optional()
+			connect: Joi.boolean().optional(),
+			read: Joi.boolean().optional(),
+			write: Joi.boolean().optional()
 		}
 	);
 const SCHEMA = Joi.object

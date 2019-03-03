@@ -10,6 +10,8 @@ export interface Topology
 export interface BaseUser
 {
     username: string;
+    read?: boolean;
+    write?: boolean;
 };
 export interface GlobalUsers extends Array<string | GlobalUser> {};
 export interface GlobalUser extends BaseUser
