@@ -4,6 +4,7 @@
 const Path = require('path');
 const { BannerPlugin } = require('webpack');
 const NodeExternals = require('webpack-node-externals');
+const clone = require('clone');
 
 // Constants
 const TYPESCRIPT_IGNORE = /(?:node_modules)$/;
@@ -42,7 +43,7 @@ const appConfig =
 	]
 };
 
-const cliConfig = Object.assign({}, appConfig);
+const cliConfig = clone(appConfig);
 cliConfig.entry = './src/CLI/index.ts';
 cliConfig.output.filename = 'cli.js';
 cliConfig.plugins = [new BannerPlugin({banner: '#!/usr/bin/env node', raw: true})];

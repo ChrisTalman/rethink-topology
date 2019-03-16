@@ -14,6 +14,6 @@ declare module '@bluecewe/rethink-topology'
     	rethink: string | RConnectionOptions;
     }
     /** Loads topology from default location and deploys it to the database provided in the options. */
-    export function deploy({options}: {options: Options}): Promise<void>;
+    export function deploy(options: Options): Promise<void>;
     export class ConnectionConfigFileError extends Error {}
 }

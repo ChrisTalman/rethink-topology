@@ -3,4 +3,4 @@
 // External Modules
 import deploy from 'src/App/Modules/Deploy';
 
-deploy({options: {rethink: './config.json'}});
+deploy({rethink: './config.json', log: true});
