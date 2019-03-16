@@ -7,7 +7,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 import guaranteeTable from './GuaranteeTable';
 
 // Types
-import { Database } from 'src/Types/Topology';
+import { Database } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 export interface TableList extends Array<TableListItem> {};
 export interface TableListItem

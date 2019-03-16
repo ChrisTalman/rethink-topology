@@ -7,7 +7,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 import guaranteeIndex from './GuaranteeIndex';
 
 // Types
-import { Table } from 'src/Types/Topology';
+import { Table } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 export interface IndexList extends Array<string> {};
 

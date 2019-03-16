@@ -8,7 +8,7 @@ import guaranteeIndexes from './GuaranteeIndexes';
 import { generatePermissions } from './GuaranteeUsers';
 
 // Types
-import { Table, TableUser } from 'src/Types/Topology';
+import { Table, TableUser } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 import { TableList } from './GuaranteeTables';
 

@@ -9,7 +9,7 @@ import guaranteeTables from './GuaranteeTables';
 import { generatePermissions } from './GuaranteeUsers';
 
 // Types
-import { Database, DatabaseUser } from 'src/Types/Topology';
+import { Database, DatabaseUser } from 'src/App/Types/Topology';
 
 export default async function(database: Database, deployment: Deployment)
 {

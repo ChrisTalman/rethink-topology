@@ -44,7 +44,7 @@ const DEFAULT_DATABASE_NAME = 'test';
 
 // Types
 import { Connection, RConnectionOptions } from 'rethinkdb-ts';
-import { Topology, Database } from 'src/Types/Topology';
+import { Topology, Database } from 'src/App/Types/Topology';
 export interface Options
 {
 	/** Determines whether the default database 'tests' should be deleted. */

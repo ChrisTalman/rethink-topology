@@ -2,28 +2,21 @@
 
 // External Modules
 const Path = require('path');
+const { BannerPlugin } = require('webpack');
 const NodeExternals = require('webpack-node-externals');
 
 // Constants
 const TYPESCRIPT_IGNORE = /(?:node_modules)$/;
-const NODE_EXTERNALS_WHITELIST = [/^@bluecewe\/[\w-]+/];
 
-module.exports =
+const appConfig =
 {
 	mode: 'development',
     target: 'node',
-    entry:
-    {
-        app: './src/index.ts'
-    },
+    entry: './src/App/index.ts',
     resolve:
     {
         extensions: ['.ts', '.js', '.json'],
-        alias:
-        {
-            src: __dirname + '/src',
-            node_modules: __dirname + '/node_modules'
-        }
+        alias: { src: __dirname + '/src' }
     },
     output:
     {
@@ -45,6 +38,13 @@ module.exports =
     },
 	externals:
 	[
-		NodeExternals({whitelist: NODE_EXTERNALS_WHITELIST})
+		NodeExternals()
 	]
 };
+
+const cliConfig = Object.assign({}, appConfig);
+cliConfig.entry = './src/CLI/index.ts';
+cliConfig.output.filename = 'cli.js';
+cliConfig.plugins = [new BannerPlugin({banner: '#!/usr/bin/env node', raw: true})];
+
+module.exports = [appConfig, cliConfig];

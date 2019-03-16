@@ -7,7 +7,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Types
 import { RDatum } from 'rethinkdb-ts';
-import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/Types/Topology';
+import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 import { IndexList } from './GuaranteeIndexes';
 type IndexFunction = (document: RDatum) => any;

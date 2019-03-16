@@ -10,7 +10,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 import Deployment from './Deployment';
 
 // Types
-import { GlobalUser, DatabaseUser, TableUser } from 'src/Types/Topology';
+import { GlobalUser, DatabaseUser, TableUser } from 'src/App/Types/Topology';
 interface Passwords
 {
 	[username: string]: string;

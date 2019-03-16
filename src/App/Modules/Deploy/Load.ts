@@ -6,7 +6,7 @@ import { promises as FileSystemPromises } from 'fs';
 const { readFile } = FileSystemPromises;
 
 // Types
-import { Topology } from 'src/Types/Topology';
+import { Topology } from 'src/App/Types/Topology';
 
 // Constants
 const FILE_NAME = 'topology.config.js';
