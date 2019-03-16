@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -91,7 +92,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/App/index.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/CLI/index.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -216,15 +217,15 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "./src/App/index.ts":
+/***/ "./src/CLI/index.ts":
 /*!**************************!*\
-  !*** ./src/App/index.ts ***!
+  !*** ./src/CLI/index.ts ***!
   \**************************/
-/*! exports provided: deploy, ConnectionConfigFileError */
+/*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var src_App_Modules_Deploy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/App/Modules/Deploy */ \"./src/App/Modules/Deploy/index.ts\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"deploy\", function() { return src_App_Modules_Deploy__WEBPACK_IMPORTED_MODULE_0__[\"default\"]; });\n\n/* harmony import */ var src_App_Modules_Deploy_Deployment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! src/App/Modules/Deploy/Deployment */ \"./src/App/Modules/Deploy/Deployment.ts\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"ConnectionConfigFileError\", function() { return src_App_Modules_Deploy_Deployment__WEBPACK_IMPORTED_MODULE_1__[\"ConnectionConfigFileError\"]; });\n\n\r\n\r\n\r\n\n\n//# sourceURL=webpack:///./src/App/index.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var src_App_Modules_Deploy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! src/App/Modules/Deploy */ \"./src/App/Modules/Deploy/index.ts\");\n\r\n\r\nObject(src_App_Modules_Deploy__WEBPACK_IMPORTED_MODULE_0__[\"default\"])({ options: { rethink: './config.json' } });\r\n\n\n//# sourceURL=webpack:///./src/CLI/index.ts?");
 
 /***/ }),
 
