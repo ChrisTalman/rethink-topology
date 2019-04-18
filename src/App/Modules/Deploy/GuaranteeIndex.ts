@@ -114,7 +114,7 @@ function generateIndexFunction({index}: {index: IndexVariant})
 		}
 		else if ('arbitrary' in index)
 		{
-			indexFunction = index.arbitrary(RethinkDB.row);
+			indexFunction = index.arbitrary;
 		}
 		else
 		{
