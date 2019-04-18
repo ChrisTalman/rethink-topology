@@ -1,5 +1,8 @@
 'use strict';
 
+// Types
+import { RDatum } from 'rethinkdb-ts';
+
 export interface Topology
 {
     shards?: number;
@@ -71,7 +74,7 @@ export interface NameConvertIndex extends NameIndex
 };
 export interface NameArbitraryIndex extends NameIndex
 {
-    arbitrary: Function;
+    arbitrary: (document: RDatum) => any;
 };
 export interface CompoundIndex
 {
