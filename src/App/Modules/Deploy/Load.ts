@@ -113,23 +113,14 @@ const SCHEMA = Joi.object
 /** Fetches and validates topology from file. */
 export default async function load()
 {
-    let source: string;
+    let topology: Topology;
 	try
 	{
-		source = await readFile(FILE_NAME, 'utf8');
+		topology = require(FILE_NAME);
 	}
 	catch (error)
 	{
 		throw new TopologyFileError(error);
-	};
-	let topology: Topology;
-	try
-	{
-		topology = eval(source);
-	}
-	catch (error)
-	{
-		throw new TopologyEvaluationError(error);
 	};
 	const validated = Joi.validate(topology, SCHEMA);
 	if (validated.error) throw new TopologySchemaError(validated.error.message);
@@ -145,14 +136,6 @@ export default async function load()
 };
 
 class TopologyFileError extends Error
-{
-	constructor(error: Error)
-	{
-		super(error.message);
-	};
-};
-
-class TopologyEvaluationError extends Error
 {
 	constructor(error: Error)
 	{
