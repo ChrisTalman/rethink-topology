@@ -1,6 +1,7 @@
 'use strict';
 
 // External Modules
+import { join as joinPath } from 'path';
 import Joi from 'joi';
 
 // Types
@@ -8,6 +9,7 @@ import { Topology } from 'src/App/Types/Topology';
 
 // Constants
 const FILE_PATH = './topology.config.js';
+const ABSOLUTE_FILE_PATH = joinPath(process.cwd(), FILE_PATH).replace(/\\/g, '\\\\');
 const ARBITRARY_INDEX_SCHEMA = Joi.func().optional();
 const NAME_INDEX_SCHEMA = Joi.object
 	(
@@ -114,7 +116,7 @@ export default async function load()
     let topology: Topology;
 	try
 	{
-		topology = require(FILE_PATH);
+		topology = eval('require(\'' + ABSOLUTE_FILE_PATH + '\')');
 	}
 	catch (error)
 	{
