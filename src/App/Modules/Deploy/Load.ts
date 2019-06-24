@@ -2,14 +2,12 @@
 
 // External Modules
 import Joi from 'joi';
-import { promises as FileSystemPromises } from 'fs';
-const { readFile } = FileSystemPromises;
 
 // Types
 import { Topology } from 'src/App/Types/Topology';
 
 // Constants
-const FILE_NAME = 'topology.config.js';
+const FILE_PATH = './topology.config.js';
 const ARBITRARY_INDEX_SCHEMA = Joi.func().optional();
 const NAME_INDEX_SCHEMA = Joi.object
 	(
@@ -116,7 +114,7 @@ export default async function load()
     let topology: Topology;
 	try
 	{
-		topology = require(FILE_NAME);
+		topology = require(FILE_PATH);
 	}
 	catch (error)
 	{
