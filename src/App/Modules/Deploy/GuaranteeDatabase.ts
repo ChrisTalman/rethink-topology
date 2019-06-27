@@ -10,11 +10,24 @@ import { generatePermissions } from './GuaranteeUsers';
 
 // Types
 import { Database, DatabaseUser } from 'src/App/Types/Topology';
+import { TableResults } from './GuaranteeTable';
+interface DatabaseResult
+{
+	name: string;
+	tables: TableResults;
+};
+export interface DatabaseResults extends Array<DatabaseResult> {};
 
 export default async function(database: Database, deployment: Deployment)
 {
 	await guarantee(database, deployment);
-	await guaranteeTables(database, deployment);
+	const tableResults = await guaranteeTables(database, deployment);
+	const result: DatabaseResult =
+	{
+		name: database.name,
+		tables: tableResults
+	};
+	return result;
 };
 
 async function guarantee(database: Database, deployment: Deployment)

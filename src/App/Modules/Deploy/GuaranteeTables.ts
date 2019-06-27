@@ -21,7 +21,8 @@ export interface TablePromise extends Promise<boolean> {};
 export default async function(database: Database, deployment: Deployment)
 {
 	const tableList = await getTableList(database, deployment);
-	await Promise.all(database.tables.map(table => guaranteeTable({table, tableList, deployment})));
+	const tableResults = await Promise.all(database.tables.map(table => guaranteeTable({table, tableList, deployment})));
+	return tableResults;
 };
 
 async function getTableList(database: Database, deployment: Deployment)

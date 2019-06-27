@@ -8,6 +8,7 @@ import load from './Load';
 import Deployment from './Deployment';
 import guaranteeUsers from './GuaranteeUsers';
 import guaranteeDatabases from './GuaranteeDatabases';
+import { outputNames } from './Names';
 
 // Types
 import { Options } from './Deployment';
@@ -36,5 +37,6 @@ export default async function(options: Options)
 export async function deploy(deployment: Deployment)
 {
 	await guaranteeUsers({deployment});
-	await guaranteeDatabases(deployment);
+	const databaseResults = await guaranteeDatabases(deployment);
+	await outputNames({databaseResults});
 };

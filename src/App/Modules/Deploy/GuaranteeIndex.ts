@@ -11,12 +11,20 @@ import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/A
 import Deployment from './Deployment';
 import { IndexList } from './GuaranteeIndexes';
 type IndexFunction = (document: RDatum) => any;
+export interface IndexResult
+{
+	name: string;
+};
 
 export default async function({index, indexList, table, tableId, deployment}: {index: IndexVariant, indexList: IndexList, table: Table, tableId: string, deployment: Deployment})
 {
 	const indexName = generateIndexName(index);
 	const indexFunction = generateIndexFunction({index});
 	const exists = indexList.includes(indexName);
+	const result: IndexResult =
+	{
+		name: indexName
+	};
 	let updated = false;
 	if (exists)
 	{
@@ -29,12 +37,13 @@ export default async function({index, indexList, table, tableId, deployment}: {i
 		else
 		{
 			log('Exists.', indexName, table, deployment);
-			return;
+			return result;
 		};
 	};
 	log(updated ? 'Updating... ' : 'Creating...', indexName, table, deployment);
 	await createIndex(table, indexName, indexFunction, deployment);
 	log((updated ? 'Updated' : 'Created') + '.', indexName, table, deployment);
+	return result;
 };
 
 async function dropIndex(table: Table, indexName: string, deployment: Deployment)

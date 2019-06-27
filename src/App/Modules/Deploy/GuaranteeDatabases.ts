@@ -6,8 +6,6 @@ import guaranteeDatabase from './GuaranteeDatabase';
 
 export default async function(deployment: Deployment)
 {
-	await Promise.all
-	(
-		deployment.topology.databases.map(database => guaranteeDatabase(database, deployment))
-	);
+	const databaseResults = await Promise.all(deployment.topology.databases.map(database => guaranteeDatabase(database, deployment)));
+	return databaseResults;
 };

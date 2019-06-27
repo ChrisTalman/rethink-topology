@@ -11,11 +11,27 @@ import { generatePermissions } from './GuaranteeUsers';
 import { Table, TableUser } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 import { TableList } from './GuaranteeTables';
+import { IndexResult } from './GuaranteeIndex';
+interface TableResult
+{
+	id: string;
+	name: string;
+	indexes: IndexResults;
+};
+export interface TableResults extends Array<TableResult> {};
+export interface IndexResults extends Array<IndexResult> {};
 
 export default async function({table, tableList, deployment}: {table: Table, tableList: TableList, deployment: Deployment})
 {
 	const tableId = await guarantee({table, tableList, deployment});
-	await guaranteeIndexes({table, tableId, deployment});
+	const indexResults = await guaranteeIndexes({table, tableId, deployment});
+	const result: TableResult =
+	{
+		id: tableId,
+		name: table.name,
+		indexes: indexResults
+	};
+	return result;
 };
 
 async function guarantee({table, tableList, deployment}: {table: Table, tableList: TableList, deployment: Deployment})
