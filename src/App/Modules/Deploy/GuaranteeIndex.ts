@@ -46,7 +46,7 @@ export default async function({index, indexList, table, tableId, deployment}: {i
 	return result;
 };
 
-async function dropIndex(table: Table, indexName: string, deployment: Deployment)
+export async function dropIndex(table: Table, indexName: string, deployment: Deployment)
 {
 	const query = RethinkDB
 		.db(table.database.name)
@@ -64,7 +64,7 @@ async function createIndex(table: Table, indexName: string, indexFunction: Index
 	await query.run(deployment.connection);
 };
 
-function generateIndexName(index: IndexVariant)
+export function generateIndexName(index: IndexVariant)
 {
 	if (typeof index === 'string')
 	{

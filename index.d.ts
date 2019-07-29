@@ -8,6 +8,8 @@ declare module '@bluecewe/rethink-topology'
 	{
 		/** Determines whether the default database 'tests' should be deleted. */
 		deleteDefaultDatabase?: boolean;
+		/** Determines whether undeclared indexes should be deleted. */
+		deleteUndeclaredIndexes?: boolean;
 		/** Log debugging events to console.log(). */
 		log?: boolean;
 		/** RethinkDB connection options. If string, used as JSON file path from which to obtain connection object. */

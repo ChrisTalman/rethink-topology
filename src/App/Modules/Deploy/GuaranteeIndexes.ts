@@ -5,6 +5,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Internal Modules
 import guaranteeIndex from './GuaranteeIndex';
+import { deleteUndeclaredIndexes } from './DeleteUndeclaredIndexes';
 
 // Types
 import { Table } from 'src/App/Types/Topology';
@@ -14,6 +15,7 @@ export interface IndexList extends Array<string> {};
 export default async function({table, tableId, deployment}: {table: Table, tableId: string, deployment: Deployment})
 {
 	const indexList = await getIndexList(table, deployment);
+	await deleteUndeclaredIndexes({table, indexList, deployment});
 	const indexResults = await Promise.all(table.indexes.map(index => guaranteeIndex({index, indexList, table, tableId, deployment})));
 	return indexResults;
 };
