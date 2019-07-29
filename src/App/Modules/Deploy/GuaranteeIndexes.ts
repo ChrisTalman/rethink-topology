@@ -1,5 +1,7 @@
 'use strict';
 
+// To Do: Incorporate results of deleteUndeclaredIndexes() into index results.
+
 // External Modules
 import { r as RethinkDB } from 'rethinkdb-ts';
 
