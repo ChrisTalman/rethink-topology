@@ -21,7 +21,7 @@ export async function deleteUndeclaredIndexes({table, indexList, deployment}: {t
 	const promises: Array<Promise<void>> = [];
 	for (let indexName of indexList)
 	{
-		if (!declaredIndexes.has(indexName)) return;
+		if (declaredIndexes.has(indexName)) continue;
 		const promise = deleteUndeclaredIndex({table, indexName, deployment});
 		promises.push(promise);
 	};
