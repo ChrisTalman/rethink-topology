@@ -1,9 +1,8 @@
 {
-	"name": "@bluecewe/rethink-topology",
+	"name": "@ChrisTalman/rethink-topology",
 	"description": "Configures RethinkDB tables and indexes according to external topology file.",
 	"version": "3.4.0",
 	"main": "index.js",
-	"private": true,
 	"devDependencies": {
 		"@types/joi": "^13.4.0",
 		"@types/js-beautify": "1.8.1",
@@ -16,7 +15,7 @@
 		"webpack-node-externals": "^1.7.2"
 	},
 	"dependencies": {
-		"@bluecewe/config": "bitbucket:bluecewe/config",
+		"@ChrisTalman/config": "github:ChrisTalman/config",
 		"joi": "^13.4.0",
 		"js-beautify": "1.10.0",
 		"rethinkdb-ts": "2.4.0-rc.13",
