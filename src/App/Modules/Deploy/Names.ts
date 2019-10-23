@@ -5,6 +5,9 @@ import { promises as FileSystemPromises } from 'fs';
 const { writeFile } = FileSystemPromises;
 import { js as beuatify } from 'js-beautify';
 
+// Intenral Modules
+import Deployment from './Deployment';
+
 // Types
 import { DatabaseResults } from './GuaranteeDatabase';
 interface DatabaseNames
@@ -38,8 +41,9 @@ const BEAUTIFY_OPTIONS: JsBeautifyOptions =
 	indent_with_tabs: true
 };
 
-export async function outputNames({databaseResults}: {databaseResults: DatabaseResults})
+export async function outputNames({databaseResults, deployment}: {databaseResults: DatabaseResults, deployment: Deployment})
 {
+	if (!deployment.options.outputNames) return;
 	const databaseNames: DatabaseNames = {};
 	for (let databaseResult of databaseResults)
 	{

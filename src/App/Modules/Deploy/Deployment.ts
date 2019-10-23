@@ -34,6 +34,7 @@ const OPTIONS_SCHEMA = Joi.object
 		{
 			deleteDefaultDatabase: Joi.boolean().default(true),
 			deleteUndeclaredIndexes: Joi.boolean().default(false),
+			outputNames: Joi.boolean().default(true),
 			log: Joi.boolean().default(false),
 			rethink: Joi.alternatives(Joi.string(), RETHINK_OPTIONS_SCHEMA).required()
 		}
@@ -52,6 +53,8 @@ export interface Options
 	deleteDefaultDatabase?: boolean;
 	/** Determines whether undeclared indexes should be deleted. */
 	deleteUndeclaredIndexes?: boolean;
+	/** Determines whether `topology.names.json` should be output. */
+	outputNames?: boolean;
 	/** Log debugging events to console.log(). */
 	log?: boolean;
 	/** RethinkDB connection options. If string, used as JSON file path from which to obtain connection object. */

@@ -38,5 +38,5 @@ export async function deploy(deployment: Deployment)
 {
 	await guaranteeUsers({deployment});
 	const databaseResults = await guaranteeDatabases(deployment);
-	await outputNames({databaseResults});
+	await outputNames({databaseResults, deployment});
 };

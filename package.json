@@ -1,7 +1,7 @@
 {
 	"name": "@ChrisTalman/rethink-topology",
 	"description": "Configures RethinkDB tables and indexes according to external topology file.",
-	"version": "3.4.0",
+	"version": "3.5.0",
 	"main": "index.js",
 	"devDependencies": {
 		"@types/joi": "^13.4.0",
