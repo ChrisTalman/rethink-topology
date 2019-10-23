@@ -10,6 +10,8 @@ declare module '@ChrisTalman/rethink-topology'
 		deleteDefaultDatabase?: boolean;
 		/** Determines whether undeclared indexes should be deleted. */
 		deleteUndeclaredIndexes?: boolean;
+		/** Determines whether `topology.names.json` should be output. */
+		outputNames?: boolean;
 		/** Log debugging events to console.log(). */
 		log?: boolean;
 		/** RethinkDB connection options. If string, used as JSON file path from which to obtain connection object. */
