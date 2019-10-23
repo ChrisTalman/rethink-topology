@@ -9,7 +9,7 @@ deploy
 		rethink: './config.json',
 		log: true,
 		deleteUndeclaredIndexes: getCommandOptions().includes('--deleteUndeclaredIndexes'),
-		outputNames: getCommandOptions().includes('--noOutputNames')
+		outputNames: !getCommandOptions().includes('--noOutputNames')
 	}
 );
 
