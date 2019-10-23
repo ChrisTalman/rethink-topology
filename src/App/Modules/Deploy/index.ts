@@ -25,6 +25,7 @@ export default async function(options: Options)
 	}
 	catch (error)
 	{
+		console.error(error.stack || error);
 		throw error;
 	}
 	finally

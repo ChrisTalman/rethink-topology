@@ -24,7 +24,7 @@ interface GlobalUsersDictionary
 const FILE_PATH = './passwords.json';
 const SCHEMA = Joi
     .object()
-    .pattern(/.+/, Joi.string())
+    .pattern(/.+/, Joi.string().valid(''))
     .required()
     .label('passwords');
 
@@ -34,13 +34,13 @@ export default async function({deployment}: {deployment: Deployment})
 	validateUserDeclarations({deployment});
 	if (deployment.topology.users.length === 0) return;
     const passwords = await load();
-	await Promise.all
-	(
-		deployment.topology.users.map
-		(
-			user => guaranteeUser({user, passwords, deployment})
-		)
-	);
+	const promises: Array<Promise<void>> = [];
+	for (let user of deployment.topology.users)
+	{
+		const promise = guaranteeUser({user, passwords, deployment});
+		promises.push(promise);
+	};
+	await Promise.all(promises);
 };
 
 /** Validates that all users in every part of the topology are globally declared, throwing an exception if not. */
@@ -93,8 +93,8 @@ async function guaranteeUserPermissions({user, username, deployment}: {user: str
 
 export function generatePermissions({user}: {user: string | GlobalUser | DatabaseUser | TableUser})
 {
-	let permissions: { [permission: string]: boolean } = {};
-	if (typeof user === 'object')
+	const permissions: { [permission: string]: boolean } = {};
+	if (typeof user === 'object' && user !== null)
 	{
 		for (let permission of Object.keys(user))
 		{
