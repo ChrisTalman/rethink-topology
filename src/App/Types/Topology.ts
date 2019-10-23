@@ -50,8 +50,6 @@ export interface TableUsers extends Array<TableUser> {};
 export interface TableUser extends BaseUser
 {
 	config?: boolean;
-	read?: boolean;
-	write?: boolean;
 };
 export interface Indexes extends Array<IndexVariant> {};
 export type IndexVariant =
