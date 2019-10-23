@@ -145,7 +145,7 @@ class TopologyFileError extends Error
 
 class TopologySchemaError extends Error
 {
-	constructor(message)
+	constructor(message: string)
 	{
 		super(message);
 	};

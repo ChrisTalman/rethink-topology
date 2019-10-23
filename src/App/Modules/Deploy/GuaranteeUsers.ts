@@ -123,8 +123,14 @@ async function load()
     catch (error)
     {
 		const nodeError: NodeJS.ErrnoException = error;
-		if (nodeError.code === 'ENOENT') throw new PasswordsFileNotFoundError(error);
-        else throw new PasswordsFileError(error);
+		if (nodeError.code === 'ENOENT')
+		{
+			throw new PasswordsFileNotFoundError(error);
+		}
+        else
+		{
+			throw new PasswordsFileError(error);
+		};
     };
 	let passwords: Passwords;
 	try
