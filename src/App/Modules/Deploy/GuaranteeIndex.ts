@@ -7,7 +7,7 @@ import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Types
 import { RDatum } from 'rethinkdb-ts';
-import { Table, IndexVariant, NameIndexVariant, CompoundIndexField } from 'src/App/Types/Topology';
+import { Table, IndexVariant, NameIndexVariant, SubfieldIndex, CompoundIndexField } from 'src/App/Types/Topology';
 import Deployment from './Deployment';
 import { IndexList } from './GuaranteeIndexes';
 type IndexFunction = (document: RDatum) => any;
@@ -74,9 +74,13 @@ export function generateIndexName(index: IndexVariant)
 	{
 		return generateNameIndexName(index);
 	}
+	else if ('subfield' in index)
+	{
+		return generateSubfieldName(index);
+	}
 	else
 	{
-		const name = index.compound.map(mapCompoundIndexName).join('_');
+		const name = index.compound.map(mapCompoundIndexName).join('__');
 		return name;
 	};
 };
@@ -85,7 +89,13 @@ function generateNameIndexName(index: NameIndexVariant)
 {
 	let type: string;
 	if ('convert' in index && index.convert === Number) type = 'number';
-	const name = type ? index.name + '=>' + type : index.name;
+	const name = type ? index.name + '_' + type : index.name;
+	return name;
+};
+
+function generateSubfieldName(index: SubfieldIndex)
+{
+	const name = index.subfield.join('_');
 	return name;
 };
 
@@ -100,6 +110,10 @@ function mapCompoundIndexName(field: CompoundIndexField)
 		if ('convert' in field && field.convert === Number)
 		{
 			return generateNameIndexName(field);
+		}
+		else if ('subfield' in field)
+		{
+			return generateSubfieldName(field);
 		}
 		else
 		{
@@ -130,11 +144,24 @@ function generateIndexFunction({index}: {index: IndexVariant})
 			indexFunction = RethinkDB.row(index.name) as IndexFunction;
 		};
 	}
+	else if ('subfield' in index)
+	{
+		indexFunction = document => generateSubfieldIndexFunction({document, index});
+	}
 	else
 	{
 		indexFunction = document => index.compound.map(field => mapCompoundIndexFunction({field, document}));
 	};
 	return indexFunction;
+};
+
+function generateSubfieldIndexFunction({document, index}: {document: RDatum, index: SubfieldIndex})
+{
+	for (let field of index.subfield)
+	{
+		document = document(field);
+	};
+	return document;
 };
 
 function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField, document: any})
@@ -152,6 +179,10 @@ function mapCompoundIndexFunction({field, document}: {field: CompoundIndexField,
 		else if ('arbitrary' in field)
 		{
 			return field.arbitrary(document);
+		}
+		else if ('subfield' in field)
+		{
+			return generateSubfieldIndexFunction({document, index: field});
 		}
 		else
 		{

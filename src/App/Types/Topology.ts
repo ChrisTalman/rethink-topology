@@ -55,6 +55,7 @@ export interface Indexes extends Array<IndexVariant> {};
 export type IndexVariant =
 	string
 	| NameIndexVariant
+	| SubfieldIndex
 	| CompoundIndex
 ;
 export type NameIndexVariant =
@@ -74,8 +75,12 @@ export interface NameArbitraryIndex extends NameIndex
 {
 	arbitrary: (document: RDatum) => any;
 };
+export interface SubfieldIndex
+{
+	subfield: Array<string>;
+};
 export interface CompoundIndex
 {
 	compound: Array<CompoundIndexField>;
 };
-export type CompoundIndexField = string | NameIndexVariant;
+export type CompoundIndexField = string | NameIndexVariant | SubfieldIndex;

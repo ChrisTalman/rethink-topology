@@ -10,6 +10,10 @@ import { Topology } from 'src/App/Types/Topology';
 // Constants
 const FILE_PATH = './topology.config.js';
 const ABSOLUTE_FILE_PATH = joinPath(process.cwd(), FILE_PATH).replace(/\\/g, '\\\\');
+const SUBFIELD_INDEX_SCHEMA =
+{
+	subfield: Joi.array().items(Joi.string()).min(2)
+};
 const ARBITRARY_INDEX_SCHEMA = Joi.func().optional();
 const NAME_INDEX_SCHEMA = Joi.object
 	(
@@ -26,13 +30,15 @@ const INDEXES_SCHEMA = Joi
 	(
 		Joi.string(),
 		NAME_INDEX_SCHEMA,
+		SUBFIELD_INDEX_SCHEMA,
 		{
 			compound: Joi
 				.array()
 				.items
 				(
 					Joi.string(),
-					NAME_INDEX_SCHEMA
+					NAME_INDEX_SCHEMA,
+					SUBFIELD_INDEX_SCHEMA
 				)
 				.min(1)
 				.optional()
