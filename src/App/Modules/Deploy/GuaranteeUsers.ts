@@ -24,7 +24,7 @@ interface GlobalUsersDictionary
 const FILE_PATH = './passwords.json';
 const SCHEMA = Joi
     .object()
-    .pattern(/.+/, Joi.string().valid(''))
+    .pattern(/.+/, Joi.string().allow(''))
     .required()
     .label('passwords');
 
