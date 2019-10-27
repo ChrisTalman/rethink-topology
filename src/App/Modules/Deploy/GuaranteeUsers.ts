@@ -174,7 +174,8 @@ class PasswordsSchemaError extends Error
 {
 	constructor(message: string)
 	{
-		super(message);
+		const formatted = 'Passwords Schema Error: ' + message;
+		super(formatted);
 	};
 };
 
