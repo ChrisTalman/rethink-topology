@@ -2,6 +2,7 @@
 **
 # Include specific files
 !/index.js
+!/cli.js
 !/index.d.ts
 !/package.json
 !/package-lock.json
