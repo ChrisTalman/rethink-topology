@@ -1,6 +1,6 @@
 {
-	"name": "@ChrisTalman/rethink-topology",
-	"description": "Configures RethinkDB tables and indexes according to external topology file.",
+	"name": "@chris-talman/rethink-topology",
+	"description": "Configures RethinkDB databases, tables, and indexes according to external topology file",
 	"version": "4.0.0",
 	"main": "index.js",
 	"devDependencies": {
@@ -18,7 +18,7 @@
 		"@ChrisTalman/config": "github:ChrisTalman/config",
 		"joi": "^13.4.0",
 		"js-beautify": "1.10.0",
-		"rethinkdb-ts": "2.4.0-rc.13",
+		"rethinkdb-ts": ">=2.4.0-rc.16",
 		"ulid": "^2.3.0"
 	},
 	"scripts": {

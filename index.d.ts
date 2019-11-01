@@ -2,7 +2,7 @@
 
 // Types
 import { RConnectionOptions } from 'rethinkdb-ts';
-declare module '@ChrisTalman/rethink-topology'
+declare module '@chris-talman/rethink-topology'
 {
 	export interface Options
 	{
