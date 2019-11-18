@@ -4,7 +4,7 @@
 import { r as RethinkDB } from 'rethinkdb-ts';
 import { ulid } from 'ulid';
 import * as Joi from 'joi';
-import Config from '@ChrisTalman/config';
+import Config from '@chris-talman/config';
 
 // Constants
 const RETHINK_OPTIONS_SCHEMA = Joi.object
