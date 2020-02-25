@@ -3,7 +3,7 @@
 // External Modules
 import { r as RethinkDB } from 'rethinkdb-ts';
 import { ulid } from 'ulid';
-import * as Joi from 'joi';
+import Joi from '@hapi/joi';
 import Config from '@chris-talman/config';
 
 // Constants
@@ -49,6 +49,8 @@ import { Connection, RConnectionOptions } from 'rethinkdb-ts';
 import { Topology, Database } from 'src/App/Types/Topology';
 export interface Options
 {
+	/** Topology to deploy instead of fetching from file system. */
+	topology?: Topology;
 	/** Determines whether the default database 'tests' should be deleted. */
 	deleteDefaultDatabase?: boolean;
 	/** Determines whether undeclared indexes should be deleted. */
@@ -81,7 +83,7 @@ export default class Deployment
 	/** Validates deployment options and returns transformed object with appropriate defaults. */
 	private validateOptions({options}: {options: Options})
 	{
-		const validated = Joi.validate(options, OPTIONS_SCHEMA);
+		const validated = Joi.compile(OPTIONS_SCHEMA).validate(options);
 		if (validated.error) throw new Error(validated.error.message);
 		options = validated.value;
 		return options;

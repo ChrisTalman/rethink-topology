@@ -4,7 +4,7 @@
 // To Do: Check own user permissions before any operations (including index comparison).
 
 // Internal Modules
-import load from './Load';
+import { load, validate } from './Load';
 import Deployment from './Deployment';
 import guaranteeUsers from './GuaranteeUsers';
 import guaranteeDatabases from './GuaranteeDatabases';
@@ -14,14 +14,14 @@ import { outputNames } from './Names';
 import { Options } from './Deployment';
 
 /** Loads topology from default location and deploys it to the database provided in the options. */
-export default async function(options: Options)
+export async function deploy(options: Options)
 {
-	const topology = await load();
+	const topology = options.topology ? validate(options.topology) : await load();
 	const deployment = new Deployment({topology, options});
 	await deployment.initialise();
 	try
 	{
-		await deploy(deployment);
+		await executeDeploy(deployment);
 	}
 	catch (error)
 	{
@@ -35,7 +35,7 @@ export default async function(options: Options)
 };
 
 /** Deploys deployment. */
-export async function deploy(deployment: Deployment)
+export async function executeDeploy(deployment: Deployment)
 {
 	await guaranteeUsers({deployment});
 	const databaseResults = await guaranteeDatabases(deployment);

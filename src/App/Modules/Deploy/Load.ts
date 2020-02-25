@@ -2,7 +2,7 @@
 
 // External Modules
 import { join as joinPath } from 'path';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 // Types
 import { Topology } from 'src/App/Types/Topology';
@@ -117,7 +117,7 @@ const SCHEMA = Joi.object
 	.required();
 
 /** Fetches and validates topology from file. */
-export default async function load()
+export async function load()
 {
     let topology: Topology;
 	try
@@ -128,7 +128,13 @@ export default async function load()
 	{
 		throw new TopologyFileError(error);
 	};
-	const validated = Joi.validate(topology, SCHEMA);
+	topology = validate(topology);
+	return topology;
+};
+
+export function validate(topology: Topology)
+{
+	const validated = Joi.compile(SCHEMA).validate(topology);
 	if (validated.error) throw new TopologySchemaError(validated.error.message);
 	topology = validated.value;
 	for (let database of topology.databases)

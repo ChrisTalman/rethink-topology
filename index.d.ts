@@ -6,7 +6,7 @@ declare module '@chris-talman/rethink-topology'
 {
 	export interface Options
 	{
-		/** Determines whether the default database 'tests' should be deleted. */
+		/** Determines whether the default database `tests` should be deleted. */
 		deleteDefaultDatabase?: boolean;
 		/** Determines whether undeclared indexes should be deleted. */
 		deleteUndeclaredIndexes?: boolean;

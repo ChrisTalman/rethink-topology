@@ -1,7 +1,7 @@
 'use strict';
 
 // External Modules
-import deploy from 'src/App/Modules/Deploy';
+import { deploy } from 'src/App/Modules/Deploy';
 
 deploy
 (

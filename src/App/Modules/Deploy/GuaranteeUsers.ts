@@ -3,7 +3,7 @@
 // External Modules
 import { promises as FileSystemPromises } from 'fs';
 const { readFile } = FileSystemPromises;
-import * as Joi from 'joi';
+import Joi from '@hapi/joi';
 import { r as RethinkDB } from 'rethinkdb-ts';
 
 // Internal Modules
@@ -141,8 +141,19 @@ async function load()
 	{
 		throw new PasswordsJsonError(error);
 	};
-	const validated = Joi.validate(passwords, SCHEMA);
-	if (validated.error) throw new PasswordsSchemaError(validated.error.message);
+	try
+	{
+		await Joi.compile(SCHEMA).validateAsync(passwords);
+	}
+	catch (error)
+	{
+		if ((Joi as unknown as {isError: (error: any) => boolean}).isError(error))
+		{
+			const validationError: Joi.ValidationError = error;
+			throw new PasswordsSchemaError(validationError.message);
+		}
+		else throw error;
+	};
 	return passwords;
 };
 

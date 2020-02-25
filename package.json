@@ -1,22 +1,22 @@
 {
 	"name": "@chris-talman/rethink-topology",
 	"description": "Configures RethinkDB databases, tables, and indexes according to external topology file",
-	"version": "4.0.2",
+	"version": "4.1.0",
 	"main": "index.js",
 	"devDependencies": {
-		"@types/joi": "^13.4.0",
+		"@types/hapi__joi": "16.0.12",
 		"@types/js-beautify": "1.8.1",
 		"@types/node": "^10.5.3",
 		"clone": "2.1.2",
 		"ts-loader": "4.5.0",
-		"typescript": "2.9.2",
+		"typescript": "3.8.2",
 		"webpack": "^4.16.2",
 		"webpack-cli": "^3.1.0",
 		"webpack-node-externals": "^1.7.2"
 	},
 	"dependencies": {
 		"@chris-talman/config": "3.2.0",
-		"joi": "^13.4.0",
+		"@hapi/joi": "17.1.0",
 		"js-beautify": "1.10.0",
 		"rethinkdb-ts": ">=2.4.0-rc.16",
 		"ulid": "^2.3.0"
