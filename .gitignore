@@ -2,3 +2,5 @@
 config.json
 topology.config.js
 /Testing
+/cli.js
+/index.js
