@@ -7,6 +7,7 @@ import Joi from '@hapi/joi';
 import Config from '@chris-talman/config';
 
 // Constants
+import { SCHEMA as TOPOLOGY_SCHEMA } from './Load';
 const RETHINK_OPTIONS_SCHEMA = Joi.object
 	(
 		{
@@ -32,6 +33,7 @@ const RETHINK_OPTIONS_SCHEMA = Joi.object
 const OPTIONS_SCHEMA = Joi.object
 	(
 		{
+			topology: TOPOLOGY_SCHEMA.optional(),
 			deleteDefaultDatabase: Joi.boolean().default(true),
 			deleteUndeclaredIndexes: Joi.boolean().default(false),
 			outputNames: Joi.boolean().default(true),

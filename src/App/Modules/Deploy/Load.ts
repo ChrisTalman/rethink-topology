@@ -105,7 +105,7 @@ const GLOBAL_USER_SCHEMA = Joi
 			write: Joi.boolean().optional()
 		}
 	);
-const SCHEMA = Joi.object
+export const SCHEMA = Joi.object
 	(
 		{
 			shards: SHARDS_SCHEMA.default(1),
