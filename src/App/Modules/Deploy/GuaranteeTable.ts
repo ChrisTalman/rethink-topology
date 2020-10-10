@@ -86,7 +86,8 @@ async function guaranteeUser({user, table, deployment}: {user: TableUser, table:
 {
 	const permissions = generatePermissions({user});
 	const query = RethinkDB
-		.db(table.name)
+		.db(table.database.name)
+		.table(table.name)
 		.grant(user.username, permissions);
 	await query.run(deployment.connection);
 };
