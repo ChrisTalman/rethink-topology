@@ -98,7 +98,8 @@ export interface NameArbitraryIndex extends NameIndex
 }
 export interface SubfieldIndex
 {
-	subfield: Array<string>;
+	subfield: Array <string>;
+	multi?: boolean;
 }
 export interface CompoundIndex
 {

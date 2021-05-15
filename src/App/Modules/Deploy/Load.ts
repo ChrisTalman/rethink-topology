@@ -12,7 +12,8 @@ const FILE_PATH = './topology.config.js';
 const ABSOLUTE_FILE_PATH = joinPath(process.cwd(), FILE_PATH).replace(/\\/g, '\\\\');
 const SUBFIELD_INDEX_SCHEMA =
 {
-	subfield: Joi.array().items(Joi.string()).min(2)
+	subfield: Joi.array().items(Joi.string()).min(2),
+	multi: Joi.boolean().optional()
 };
 const ARBITRARY_INDEX_SCHEMA = Joi.func().optional();
 const NAME_INDEX_SCHEMA = Joi.object

@@ -41,7 +41,7 @@ export default async function({index, indexList, table, tableId, deployment}: {i
 		};
 	};
 	log(updated ? 'Updating... ' : 'Creating...', indexName, table, deployment);
-	await createIndex(table, indexName, indexFunction, deployment);
+	await createIndex(table, indexName, indexFunction, index, deployment);
 	log((updated ? 'Updated' : 'Created') + '.', indexName, table, deployment);
 	return result;
 };
@@ -55,12 +55,13 @@ export async function dropIndex(table: Table, indexName: string, deployment: Dep
 	await query.run(deployment.connection);
 };
 
-async function createIndex(table: Table, indexName: string, indexFunction: IndexFunction, deployment: Deployment)
+async function createIndex(table: Table, indexName: string, indexFunction: IndexFunction, index: IndexVariant, deployment: Deployment)
 {
+	const multi = typeof index !== 'string' && 'subfield' in index ? index.multi === true : false;
 	const query = RethinkDB
 		.db(table.database.name)
 		.table(table.name)
-		.indexCreate(indexName, indexFunction);
+		.indexCreate(indexName, indexFunction, {multi});
 	await query.run(deployment.connection);
 };
 
