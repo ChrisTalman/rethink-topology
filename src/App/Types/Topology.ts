@@ -74,6 +74,7 @@ export interface NameConvertIndex extends NameIndex
 export interface NameArbitraryIndex extends NameIndex
 {
 	arbitrary: (document: RDatum) => any;
+	multi?: boolean;
 };
 export interface SubfieldIndex
 {

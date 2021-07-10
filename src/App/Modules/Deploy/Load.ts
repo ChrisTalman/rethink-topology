@@ -21,7 +21,8 @@ const NAME_INDEX_SCHEMA = Joi.object
 		{
 			name: Joi.string().required(),
 			convert: Joi.valid(Number).optional(),
-			arbitrary: ARBITRARY_INDEX_SCHEMA
+			arbitrary: ARBITRARY_INDEX_SCHEMA,
+			multi: Joi.boolean().optional()
 		}
 	)
 	.without('convert', ['arbitrary']);

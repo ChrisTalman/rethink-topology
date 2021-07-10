@@ -57,7 +57,7 @@ export async function dropIndex(table: Table, indexName: string, deployment: Dep
 
 async function createIndex(table: Table, indexName: string, indexFunction: IndexFunction, index: IndexVariant, deployment: Deployment)
 {
-	const multi = typeof index !== 'string' && 'subfield' in index ? index.multi === true : false;
+	const multi = typeof index !== 'string' && 'multi' in index ? index.multi === true : false;
 	const query = RethinkDB
 		.db(table.database.name)
 		.table(table.name)
